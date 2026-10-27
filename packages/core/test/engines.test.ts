@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  normalizeRole,
   DEFAULT_MATCH_CONFIG,
   DEFAULT_SCAN_CONFIG,
   broadeningSteps,
@@ -398,5 +399,17 @@ describe('broadening', () => {
   it('does not claim to widen cities when none were restricted', () => {
     const base = { roleIds: ['fullstack'], experienceMin: 3, experienceMax: 6, postedWithinDays: 30, countries: ['IN'], cities: [], nearbyCities: false };
     expect(broadeningSteps(base).some((s) => /Nearby cities/.test(s.disclosure))).toBe(false);
+  });
+});
+
+describe('normalizeRole', () => {
+  it('accepts engineering titles', () => {
+    expect(normalizeRole('Senior Full Stack Engineer')).toBe('fullstack');
+    expect(normalizeRole('Software Engineer II, Payments')).toBe('software');
+    expect(normalizeRole('Backend Developer')).toBe('backend');
+    expect(normalizeRole('Frontend Engineer')).toBe('frontend');
+  });
+  it('rejects roles that only share a word with engineering', () => {
+    for (const t of ['Developer Support Engineer', 'Developer Advocate', 'Sales Engineer', 'Solutions Engineer', 'Engineering Manager', 'Software Engineering Intern', 'Customer Success Engineer', 'Forward Deployed Engineer, India', 'Director, Software Engineering']) expect(normalizeRole(t), t).toBeUndefined();
   });
 });

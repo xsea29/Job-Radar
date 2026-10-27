@@ -4,7 +4,7 @@
  *
  *   npm run discover -w @jobradar/api -- [--candidates config/boards.candidates.json] [--out config/boards.json] [--role fullstack] [--years 4] [--min-relevant 1]
  */
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 import type { RoleId } from '@jobradar/core';
 import { boardsFromDiscovery, defaultContext, defaultRequest, discoverBoards, summarizeDiscovery, type BoardCandidate } from '@jobradar/ingest';
@@ -16,6 +16,7 @@ const { values: a } = parseArgs({
     role: { type: 'string', default: 'fullstack' },
     years: { type: 'string', default: '4' },
     'min-relevant': { type: 'string', default: '1' },
+    merge: { type: 'boolean', default: false },
   },
 });
 
@@ -37,7 +38,13 @@ const s = summarizeDiscovery(rows);
 console.log(`\n${s.found} found · ${s.notFound} not found · ${s.inconclusive} inconclusive · ${s.withRelevantJobs} with relevant jobs`);
 if (s.inconclusive > 0) console.log(`! ${s.inconclusive} candidate(s) could not be checked (network blocked or errors). Nothing is concluded about them.`);
 
-const boards = boardsFromDiscovery(rows, Number(a['min-relevant']));
+let boards = boardsFromDiscovery(rows, Number(a['min-relevant']));
+if (a.merge && existsSync(a.out!)) {
+  const prev = (JSON.parse(readFileSync(a.out!, 'utf8')) as { boards: typeof boards }).boards;
+  const keys = new Set(boards.map((b) => `${b.ats}:${b.token}`));
+  boards = [...prev.filter((b) => !keys.has(`${b.ats}:${b.token}`)), ...boards];
+  console.log(`Merged with ${prev.length} existing board(s).`);
+}
 if (boards.length === 0) {
   console.log(`No boards qualified, so ${a.out} was NOT written.`);
   process.exit(s.found === 0 && s.inconclusive === s.checked ? 3 : 0);

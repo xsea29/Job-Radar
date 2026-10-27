@@ -1,0 +1,556 @@
+{
+  "defaults": {
+    "estimated": true,
+    "source": "assistant estimate from general knowledge, unverified"
+  },
+  "candidates": [
+    {
+      "name": "Tenable",
+      "tokens": [
+        "tenable"
+      ],
+      "employees": 2000,
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Qualys",
+      "tokens": [
+        "qualys"
+      ],
+      "employees": 2500,
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "HubSpot",
+      "tokens": [
+        "hubspot"
+      ],
+      "employees": 8000,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Wayfair",
+      "tokens": [
+        "wayfair"
+      ],
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Flexera",
+      "tokens": [
+        "flexera"
+      ],
+      "employees": 1500,
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Egnyte",
+      "tokens": [
+        "egnyte"
+      ],
+      "employees": 1000,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Icertis",
+      "tokens": [
+        "icertis"
+      ],
+      "employees": 1500,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Acquia",
+      "tokens": [
+        "acquia"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Eightfold AI",
+      "tokens": [
+        "eightfoldai",
+        "eightfold"
+      ],
+      "employees": 900,
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Innovaccer",
+      "tokens": [
+        "innovaccer"
+      ],
+      "industry": "Healthtech"
+    },
+    {
+      "name": "Uniphore",
+      "tokens": [
+        "uniphore"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Practo",
+      "tokens": [
+        "practo"
+      ],
+      "industry": "Healthtech"
+    },
+    {
+      "name": "Kissflow",
+      "tokens": [
+        "kissflow"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Qure.ai",
+      "tokens": [
+        "qureai",
+        "qure"
+      ],
+      "industry": "Healthtech"
+    },
+    {
+      "name": "PayU",
+      "tokens": [
+        "payu"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Spinny",
+      "tokens": [
+        "spinny"
+      ],
+      "industry": "Mobility"
+    },
+    {
+      "name": "Zepto",
+      "tokens": [
+        "zepto"
+      ],
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Healthify",
+      "tokens": [
+        "healthifyme",
+        "healthify"
+      ],
+      "industry": "Healthtech"
+    },
+    {
+      "name": "Lendingkart",
+      "tokens": [
+        "lendingkart"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Kreditbee",
+      "tokens": [
+        "kreditbee"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "BharatPe",
+      "tokens": [
+        "bharatpe"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Mswipe",
+      "tokens": [
+        "mswipe"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Fractal",
+      "tokens": [
+        "fractal",
+        "fractalanalytics"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Tredence",
+      "tokens": [
+        "tredence"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Sigmoid",
+      "tokens": [
+        "sigmoid"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Quantiphi",
+      "tokens": [
+        "quantiphi"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Thoughtworks",
+      "tokens": [
+        "thoughtworks"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Nagarro",
+      "tokens": [
+        "nagarro"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Zendesk",
+      "tokens": [
+        "zendesk"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Dynatrace",
+      "tokens": [
+        "dynatrace"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "New Relic",
+      "tokens": [
+        "newrelic"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Splunk",
+      "tokens": [
+        "splunk"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Anaplan",
+      "tokens": [
+        "anaplan"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Medallia",
+      "tokens": [
+        "medallia"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Sprinto",
+      "tokens": [
+        "sprinto"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Hasura",
+      "tokens": [
+        "hasura",
+        "hasurainc"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Postman",
+      "tokens": [
+        "postmanlabs",
+        "postman-inc"
+      ],
+      "employees": 1000,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Chargebee",
+      "tokens": [
+        "chargebee-inc"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Razorpay",
+      "tokens": [
+        "razorpaysoftware",
+        "razorpay-software"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Swiggy",
+      "tokens": [
+        "swiggy-in"
+      ],
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Ola",
+      "tokens": [
+        "olacabs",
+        "ola"
+      ],
+      "industry": "Mobility"
+    },
+    {
+      "name": "Krutrim",
+      "tokens": [
+        "krutrim",
+        "olakrutrim"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Rubrik India",
+      "tokens": [
+        "rubrikinc"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Nutanix Inc",
+      "tokens": [
+        "nutanix-inc"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Twilio Segment",
+      "tokens": [
+        "segment"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Harness",
+      "tokens": [
+        "harness",
+        "harnessinc"
+      ],
+      "employees": 1200,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Postman Labs",
+      "tokens": [
+        "postmanlabs"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Browserstack Inc",
+      "tokens": [
+        "browserstack-inc"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Gitlab Inc",
+      "tokens": [
+        "gitlab-inc"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Cloudera",
+      "tokens": [
+        "cloudera"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Couchbase",
+      "tokens": [
+        "couchbase"
+      ],
+      "employees": 1000,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Redis",
+      "tokens": [
+        "redis",
+        "redislabs"
+      ],
+      "employees": 1000,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Neo4j",
+      "tokens": [
+        "neo4j"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Yugabyte",
+      "tokens": [
+        "yugabyte",
+        "yugabytedb"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "SingleStore",
+      "tokens": [
+        "singlestore"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Clari",
+      "tokens": [
+        "clari"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Zoominfo",
+      "tokens": [
+        "zoominfo"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Freshworks Inc",
+      "tokens": [
+        "freshworksinc"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Moveworks",
+      "tokens": [
+        "moveworks"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Glean",
+      "tokens": [
+        "glean",
+        "gleanwork"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Hasura Labs",
+      "tokens": [
+        "hasuralabs"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "LambdaTest",
+      "tokens": [
+        "lambdatest"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Pazcare",
+      "tokens": [
+        "pazcare"
+      ],
+      "industry": "Healthtech"
+    },
+    {
+      "name": "Jar App",
+      "tokens": [
+        "jarapp",
+        "jar"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Krea",
+      "tokens": [
+        "krea"
+      ],
+      "fundingStage": "seed",
+      "industry": "AI / Data",
+      "estimated": true
+    },
+    {
+      "name": "Smallest AI",
+      "tokens": [
+        "smallestai"
+      ],
+      "fundingStage": "seed",
+      "industry": "AI / Data",
+      "estimated": true
+    },
+    {
+      "name": "Gnani",
+      "tokens": [
+        "gnani",
+        "gnaniai"
+      ],
+      "fundingStage": "series-a",
+      "industry": "AI / Data",
+      "estimated": true
+    },
+    {
+      "name": "Rocketlane",
+      "tokens": [
+        "rocketlane"
+      ],
+      "fundingStage": "series-a",
+      "industry": "SaaS",
+      "estimated": true
+    },
+    {
+      "name": "Spyne",
+      "tokens": [
+        "spyne",
+        "spyneai"
+      ],
+      "fundingStage": "series-a",
+      "industry": "AI / Data",
+      "estimated": true
+    },
+    {
+      "name": "Zluri",
+      "tokens": [
+        "zluri"
+      ],
+      "fundingStage": "series-a",
+      "industry": "SaaS",
+      "estimated": true
+    },
+    {
+      "name": "Hyperverge",
+      "tokens": [
+        "hyperverge"
+      ],
+      "fundingStage": "series-b",
+      "industry": "AI / Data",
+      "estimated": true
+    },
+    {
+      "name": "Bureau",
+      "tokens": [
+        "bureau",
+        "bureauid"
+      ],
+      "fundingStage": "series-a",
+      "industry": "Fintech",
+      "estimated": true
+    }
+  ]
+}

@@ -7,7 +7,9 @@ import {
   contentHash,
   extractExperience,
   extractSkills,
+  jaccard,
   normalizeRole,
+  shingles,
   summarizeScan,
   summarizeSections,
   type CompanyCategory,
@@ -131,6 +133,9 @@ export function toCandidate(p: RawPosting, board: BoardConfig): Candidate {
   };
 }
 
+/** Text similarity at/above which two postings by the same company, title and city count as one. */
+export const NEAR_DUPLICATE = 0.9;
+
 const DAY = 86_400_000;
 
 /** Why (if at all) a candidate fails the criteria. `undefined` = it passes. */
@@ -195,20 +200,24 @@ export function buildScan(results: FetchResult[], req: ScanRequest): ScanOutcome
   const sourceReports = results.map((r) => r.report);
   const failedBoards = results.filter((r) => r.report.status === 'failed').map((r) => r.report.boardKey);
 
-  // 1. De-duplicate the whole pool (content hash, then company + title + city).
+  // 1. De-duplicate the whole pool. Duplicate = identical text, OR the same company + title + city
+  //    with near-identical text (>= NEAR_DUPLICATE). Same title/city with different text is a different
+  //    opening (another team), so it is kept.
   const verdicts: Verdict[] = [];
   const seenHash = new Map<string, string>();
-  const seenKey = new Map<string, string>();
+  const byKey = new Map<string, { id: string; sh: Set<string> }[]>();
   const pool: Candidate[] = [];
   const all = results.flatMap((r) => r.postings.map((p) => toCandidate(p, r.board))).sort((a, b) => recency(b) - recency(a) || a.id.localeCompare(b.id));
   for (const c of all) {
-    const dupOf = seenHash.get(c.contentHash) ?? seenKey.get(c.canonicalKey);
+    let dupOf = seenHash.get(c.contentHash);
+    const sh = shingles(c.posting.description);
+    if (!dupOf) dupOf = byKey.get(c.canonicalKey)?.find((k) => jaccard(sh, k.sh) >= NEAR_DUPLICATE)?.id;
     if (dupOf) {
       verdicts.push({ id: c.id, title: c.posting.title, company: c.posting.companyName, status: 'duplicate', duplicateOf: dupOf });
       continue;
     }
     seenHash.set(c.contentHash, c.id);
-    seenKey.set(c.canonicalKey, c.id);
+    byKey.set(c.canonicalKey, [...(byKey.get(c.canonicalKey) ?? []), { id: c.id, sh }]);
     pool.push(c);
   }
 

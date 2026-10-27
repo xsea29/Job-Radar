@@ -111,8 +111,12 @@ const ROLE_RULES: { id: RoleId; re: RegExp }[] = [
   { id: 'software', re: /software (?:engineer|developer)|\bsde\b|application engineer|product engineer|member of technical staff|\bswe\b|developer\b|programmer/i },
 ];
 
+/** Titles that contain an engineering word but aren't software-engineering roles. */
+const NOT_ENGINEERING = /\b(advocate|advocacy|relations|support|customer|success|evangelist|sales|solutions? (?:engineer|architect)|sales engineer|recruit\w*|account|manager|director|head of|vp\b|intern(?:ship)?|analyst|consultant|technical writer|forward deployed)\b/i;
+
 /** Map a free-text job title to a normalised role, or undefined if unrecognised. */
 export function normalizeRole(title: string): RoleId | undefined {
+  if (NOT_ENGINEERING.test(title)) return undefined;
   for (const r of ROLE_RULES) if (r.re.test(title)) return r.id;
   return undefined;
 }

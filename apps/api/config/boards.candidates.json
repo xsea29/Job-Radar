@@ -1,37 +1,1066 @@
 {
   "_readme": "UNVERIFIED candidates. These are genuine companies I believe publish jobs on a public ATS and employ engineers in India, but the board slugs are GUESSES and the headcounts are rough ORDER-OF-MAGNITUDE estimates from general knowledge (not looked up). `npm run discover` tests every guess against the real APIs and keeps only boards that exist and have relevant postings; it never treats a network error as 'does not exist'. Sizes are deliberately set well away from the 200 / 3,000 boundaries; correct any you know better. Companies that don't hire engineers in India will simply show 0 relevant jobs and be dropped.",
-  "defaults": { "estimated": true, "source": "assistant estimate from general knowledge, unverified" },
+  "defaults": {
+    "estimated": true,
+    "source": "assistant estimate from general knowledge, unverified"
+  },
   "candidates": [
-    { "name": "Stripe", "tokens": ["stripe"], "ats": ["greenhouse"], "employees": 8000, "industry": "Fintech", "hqCity": "Bengaluru" },
-    { "name": "Databricks", "tokens": ["databricks"], "ats": ["greenhouse"], "employees": 7000, "industry": "AI / Data", "hqCity": "Bengaluru" },
-    { "name": "MongoDB", "tokens": ["mongodb"], "ats": ["greenhouse"], "employees": 5000, "industry": "Developer tools", "hqCity": "Gurugram" },
-    { "name": "Okta", "tokens": ["okta"], "ats": ["greenhouse"], "employees": 5000, "industry": "Enterprise IT", "hqCity": "Bengaluru" },
-    { "name": "Twilio", "tokens": ["twilio"], "ats": ["greenhouse"], "employees": 5000, "industry": "SaaS", "hqCity": "Bengaluru" },
-    { "name": "Airbnb", "tokens": ["airbnb"], "ats": ["greenhouse"], "employees": 6000, "industry": "Travel", "hqCity": "Bengaluru" },
-    { "name": "Datadog", "tokens": ["datadog"], "ats": ["greenhouse"], "employees": 6000, "industry": "Developer tools", "hqCity": "Bengaluru" },
-    { "name": "Cloudflare", "tokens": ["cloudflare"], "ats": ["greenhouse"], "employees": 4000, "industry": "Developer tools", "hqCity": "Bengaluru" },
-    { "name": "PhonePe", "tokens": ["phonepe"], "employees": 5000, "industry": "Fintech", "hqCity": "Bengaluru" },
-    { "name": "Swiggy", "tokens": ["swiggy"], "employees": 6000, "industry": "E-commerce", "hqCity": "Bengaluru" },
-    { "name": "Freshworks", "tokens": ["freshworks"], "employees": 5000, "industry": "SaaS", "hqCity": "Chennai" },
-
-    { "name": "GitLab", "tokens": ["gitlab"], "ats": ["greenhouse"], "employees": 2000, "industry": "Developer tools", "hqCity": "Remote" },
-    { "name": "Plaid", "tokens": ["plaid"], "ats": ["lever"], "employees": 1000, "industry": "Fintech" },
-    { "name": "Notion", "tokens": ["notion"], "ats": ["ashby"], "employees": 800, "industry": "SaaS" },
-    { "name": "Ramp", "tokens": ["ramp"], "ats": ["ashby"], "employees": 1000, "industry": "Fintech" },
-    { "name": "Vercel", "tokens": ["vercel"], "ats": ["greenhouse"], "employees": 700, "industry": "Developer tools" },
-    { "name": "Zapier", "tokens": ["zapier"], "ats": ["ashby", "lever"], "employees": 800, "industry": "SaaS", "hqCity": "Remote" },
-    { "name": "Postman", "tokens": ["postman"], "employees": 1000, "industry": "Developer tools", "hqCity": "Bengaluru" },
-    { "name": "CRED", "tokens": ["cred"], "employees": 1000, "industry": "Fintech", "hqCity": "Bengaluru" },
-    { "name": "Meesho", "tokens": ["meesho"], "employees": 1500, "industry": "E-commerce", "hqCity": "Bengaluru" },
-    { "name": "Groww", "tokens": ["groww"], "employees": 1500, "industry": "Fintech", "hqCity": "Bengaluru" },
-    { "name": "Chargebee", "tokens": ["chargebee"], "employees": 1000, "industry": "SaaS", "hqCity": "Chennai" },
-    { "name": "BrowserStack", "tokens": ["browserstack"], "employees": 1000, "industry": "Developer tools", "hqCity": "Mumbai" },
-    { "name": "Whatfix", "tokens": ["whatfix"], "employees": 700, "industry": "SaaS", "hqCity": "Bengaluru" },
-
-    { "name": "PostHog", "tokens": ["posthog"], "ats": ["ashby"], "employees": 100, "industry": "Developer tools", "hqCity": "Remote" },
-    { "name": "Linear", "tokens": ["linear"], "ats": ["ashby", "lever"], "employees": 100, "industry": "SaaS", "hqCity": "Remote" },
-    { "name": "Replit", "tokens": ["replit"], "ats": ["ashby"], "employees": 150, "industry": "Developer tools" },
-    { "name": "Hasura", "tokens": ["hasura"], "employees": 100, "industry": "Developer tools", "hqCity": "Bengaluru" },
-    { "name": "Cal.com", "tokens": ["cal", "calcom"], "ats": ["ashby"], "employees": 50, "industry": "SaaS", "hqCity": "Remote" }
+    {
+      "name": "Stripe",
+      "tokens": [
+        "stripe"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 8000,
+      "industry": "Fintech",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Databricks",
+      "tokens": [
+        "databricks"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 7000,
+      "industry": "AI / Data",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "MongoDB",
+      "tokens": [
+        "mongodb"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 5000,
+      "industry": "Developer tools",
+      "hqCity": "Gurugram"
+    },
+    {
+      "name": "Okta",
+      "tokens": [
+        "okta"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 5000,
+      "industry": "Enterprise IT",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Twilio",
+      "tokens": [
+        "twilio"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 5000,
+      "industry": "SaaS",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Airbnb",
+      "tokens": [
+        "airbnb"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 6000,
+      "industry": "Travel",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Datadog",
+      "tokens": [
+        "datadog"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 6000,
+      "industry": "Developer tools",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Cloudflare",
+      "tokens": [
+        "cloudflare"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 4000,
+      "industry": "Developer tools",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "PhonePe",
+      "tokens": [
+        "phonepe"
+      ],
+      "employees": 5000,
+      "industry": "Fintech",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Swiggy",
+      "tokens": [
+        "swiggy"
+      ],
+      "employees": 6000,
+      "industry": "E-commerce",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Freshworks",
+      "tokens": [
+        "freshworks"
+      ],
+      "employees": 5000,
+      "industry": "SaaS",
+      "hqCity": "Chennai"
+    },
+    {
+      "name": "GitLab",
+      "tokens": [
+        "gitlab"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 2000,
+      "industry": "Developer tools",
+      "hqCity": "Remote"
+    },
+    {
+      "name": "Plaid",
+      "tokens": [
+        "plaid"
+      ],
+      "ats": [
+        "lever"
+      ],
+      "employees": 1000,
+      "industry": "Fintech"
+    },
+    {
+      "name": "Notion",
+      "tokens": [
+        "notion"
+      ],
+      "ats": [
+        "ashby"
+      ],
+      "employees": 800,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Ramp",
+      "tokens": [
+        "ramp"
+      ],
+      "ats": [
+        "ashby"
+      ],
+      "employees": 1000,
+      "industry": "Fintech"
+    },
+    {
+      "name": "Vercel",
+      "tokens": [
+        "vercel"
+      ],
+      "ats": [
+        "greenhouse"
+      ],
+      "employees": 700,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Zapier",
+      "tokens": [
+        "zapier"
+      ],
+      "ats": [
+        "ashby",
+        "lever"
+      ],
+      "employees": 800,
+      "industry": "SaaS",
+      "hqCity": "Remote"
+    },
+    {
+      "name": "Postman",
+      "tokens": [
+        "postman"
+      ],
+      "employees": 1000,
+      "industry": "Developer tools",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "CRED",
+      "tokens": [
+        "cred"
+      ],
+      "employees": 1000,
+      "industry": "Fintech",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Meesho",
+      "tokens": [
+        "meesho"
+      ],
+      "employees": 1500,
+      "industry": "E-commerce",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Groww",
+      "tokens": [
+        "groww"
+      ],
+      "employees": 1500,
+      "industry": "Fintech",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Chargebee",
+      "tokens": [
+        "chargebee"
+      ],
+      "employees": 1000,
+      "industry": "SaaS",
+      "hqCity": "Chennai"
+    },
+    {
+      "name": "BrowserStack",
+      "tokens": [
+        "browserstack"
+      ],
+      "employees": 1000,
+      "industry": "Developer tools",
+      "hqCity": "Mumbai"
+    },
+    {
+      "name": "Whatfix",
+      "tokens": [
+        "whatfix"
+      ],
+      "employees": 700,
+      "industry": "SaaS",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "PostHog",
+      "tokens": [
+        "posthog"
+      ],
+      "ats": [
+        "ashby"
+      ],
+      "employees": 100,
+      "industry": "Developer tools",
+      "hqCity": "Remote"
+    },
+    {
+      "name": "Linear",
+      "tokens": [
+        "linear"
+      ],
+      "ats": [
+        "ashby",
+        "lever"
+      ],
+      "employees": 100,
+      "industry": "SaaS",
+      "hqCity": "Remote"
+    },
+    {
+      "name": "Replit",
+      "tokens": [
+        "replit"
+      ],
+      "ats": [
+        "ashby"
+      ],
+      "employees": 150,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Hasura",
+      "tokens": [
+        "hasura"
+      ],
+      "employees": 100,
+      "industry": "Developer tools",
+      "hqCity": "Bengaluru"
+    },
+    {
+      "name": "Cal.com",
+      "tokens": [
+        "cal",
+        "calcom"
+      ],
+      "ats": [
+        "ashby"
+      ],
+      "employees": 50,
+      "industry": "SaaS",
+      "hqCity": "Remote"
+    },
+    {
+      "name": "Coinbase",
+      "tokens": [
+        "coinbase"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Dropbox",
+      "tokens": [
+        "dropbox"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Pinterest",
+      "tokens": [
+        "pinterest"
+      ],
+      "employees": 4000,
+      "industry": "Media"
+    },
+    {
+      "name": "Reddit",
+      "tokens": [
+        "reddit"
+      ],
+      "employees": 2000,
+      "industry": "Media"
+    },
+    {
+      "name": "Robinhood",
+      "tokens": [
+        "robinhood"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Lyft",
+      "tokens": [
+        "lyft"
+      ],
+      "employees": 4000,
+      "industry": "Mobility"
+    },
+    {
+      "name": "DoorDash",
+      "tokens": [
+        "doordash"
+      ],
+      "employees": 8000,
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Instacart",
+      "tokens": [
+        "instacart"
+      ],
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Figma",
+      "tokens": [
+        "figma"
+      ],
+      "employees": 1500,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Asana",
+      "tokens": [
+        "asana"
+      ],
+      "employees": 1800,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Elastic",
+      "tokens": [
+        "elastic"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "PagerDuty",
+      "tokens": [
+        "pagerduty"
+      ],
+      "employees": 1000,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Zscaler",
+      "tokens": [
+        "zscaler"
+      ],
+      "employees": 7000,
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Nutanix",
+      "tokens": [
+        "nutanix"
+      ],
+      "employees": 7000,
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Rubrik",
+      "tokens": [
+        "rubrik"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Pure Storage",
+      "tokens": [
+        "purestorage"
+      ],
+      "employees": 5000,
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Confluent",
+      "tokens": [
+        "confluent"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Samsara",
+      "tokens": [
+        "samsara"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Toast",
+      "tokens": [
+        "toast",
+        "toasttab"
+      ],
+      "employees": 5000,
+      "industry": "Fintech"
+    },
+    {
+      "name": "Gusto",
+      "tokens": [
+        "gusto"
+      ],
+      "employees": 2000,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Brex",
+      "tokens": [
+        "brex"
+      ],
+      "employees": 1000,
+      "industry": "Fintech"
+    },
+    {
+      "name": "Carta",
+      "tokens": [
+        "carta"
+      ],
+      "employees": 1500,
+      "industry": "Fintech"
+    },
+    {
+      "name": "Amplitude",
+      "tokens": [
+        "amplitude"
+      ],
+      "employees": 400,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Qualtrics",
+      "tokens": [
+        "qualtrics"
+      ],
+      "employees": 5000,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Zuora",
+      "tokens": [
+        "zuora"
+      ],
+      "employees": 1500,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Fivetran",
+      "tokens": [
+        "fivetran"
+      ],
+      "employees": 1500,
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Rippling",
+      "tokens": [
+        "rippling"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "ThoughtSpot",
+      "tokens": [
+        "thoughtspot"
+      ],
+      "employees": 1000,
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Druva",
+      "tokens": [
+        "druva"
+      ],
+      "employees": 1000,
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Netskope",
+      "tokens": [
+        "netskope"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Sumo Logic",
+      "tokens": [
+        "sumologic"
+      ],
+      "employees": 800,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Cohesity",
+      "tokens": [
+        "cohesity"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Highspot",
+      "tokens": [
+        "highspot"
+      ],
+      "employees": 1000,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Mindtickle",
+      "tokens": [
+        "mindtickle"
+      ],
+      "employees": 600,
+      "industry": "SaaS"
+    },
+    {
+      "name": "CleverTap",
+      "tokens": [
+        "clevertap"
+      ],
+      "employees": 500,
+      "industry": "SaaS"
+    },
+    {
+      "name": "MoEngage",
+      "tokens": [
+        "moengage"
+      ],
+      "employees": 700,
+      "industry": "SaaS"
+    },
+    {
+      "name": "InMobi",
+      "tokens": [
+        "inmobi"
+      ],
+      "employees": 2000,
+      "industry": "Media"
+    },
+    {
+      "name": "Juspay",
+      "tokens": [
+        "juspay"
+      ],
+      "employees": 700,
+      "industry": "Fintech"
+    },
+    {
+      "name": "ShareChat",
+      "tokens": [
+        "sharechat"
+      ],
+      "employees": 2000,
+      "industry": "Media"
+    },
+    {
+      "name": "Upstox",
+      "tokens": [
+        "upstox"
+      ],
+      "employees": 1000,
+      "industry": "Fintech"
+    },
+    {
+      "name": "Atlan",
+      "tokens": [
+        "atlan"
+      ],
+      "employees": 400,
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Lenskart",
+      "tokens": [
+        "lenskart"
+      ],
+      "employees": 5000,
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Razorpay",
+      "tokens": [
+        "razorpay",
+        "razorpaysoftwareprivatelimited"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Pine Labs",
+      "tokens": [
+        "pinelabs"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Navi",
+      "tokens": [
+        "navi"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "OYO",
+      "tokens": [
+        "oyo"
+      ],
+      "industry": "Travel"
+    },
+    {
+      "name": "Zeta",
+      "tokens": [
+        "zeta"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Urban Company",
+      "tokens": [
+        "urbancompany"
+      ],
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Nykaa",
+      "tokens": [
+        "nykaa"
+      ],
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Cars24",
+      "tokens": [
+        "cars24"
+      ],
+      "industry": "Mobility"
+    },
+    {
+      "name": "Slice",
+      "tokens": [
+        "slice",
+        "sliceit"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Cashfree",
+      "tokens": [
+        "cashfree",
+        "cashfreepayments"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Setu",
+      "tokens": [
+        "setu"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Jupiter",
+      "tokens": [
+        "jupiter",
+        "jupitermoney"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Observe.AI",
+      "tokens": [
+        "observeai",
+        "observe-ai"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Yellow.ai",
+      "tokens": [
+        "yellowai",
+        "yellow-ai"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Exotel",
+      "tokens": [
+        "exotel"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Gupshup",
+      "tokens": [
+        "gupshup"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Darwinbox",
+      "tokens": [
+        "darwinbox"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "LeadSquared",
+      "tokens": [
+        "leadsquared"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Zenoti",
+      "tokens": [
+        "zenoti"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Sprinklr",
+      "tokens": [
+        "sprinklr"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Hevo Data",
+      "tokens": [
+        "hevodata",
+        "hevo"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Ultrahuman",
+      "tokens": [
+        "ultrahuman"
+      ],
+      "industry": "Healthtech"
+    },
+    {
+      "name": "Ather Energy",
+      "tokens": [
+        "atherenergy",
+        "ather"
+      ],
+      "industry": "Mobility"
+    },
+    {
+      "name": "Unacademy",
+      "tokens": [
+        "unacademy"
+      ],
+      "industry": "Edtech"
+    },
+    {
+      "name": "upGrad",
+      "tokens": [
+        "upgrad"
+      ],
+      "industry": "Edtech"
+    },
+    {
+      "name": "Pocket FM",
+      "tokens": [
+        "pocketfm"
+      ],
+      "industry": "Media"
+    },
+    {
+      "name": "Games24x7",
+      "tokens": [
+        "games24x7"
+      ],
+      "industry": "Gaming"
+    },
+    {
+      "name": "MPL",
+      "tokens": [
+        "mpl",
+        "mobilepremierleague"
+      ],
+      "industry": "Gaming"
+    },
+    {
+      "name": "Dream11",
+      "tokens": [
+        "dream11",
+        "dreamsports"
+      ],
+      "industry": "Gaming"
+    },
+    {
+      "name": "PhysicsWallah",
+      "tokens": [
+        "physicswallah",
+        "pw"
+      ],
+      "industry": "Edtech"
+    },
+    {
+      "name": "Delhivery",
+      "tokens": [
+        "delhivery"
+      ],
+      "industry": "Logistics"
+    },
+    {
+      "name": "Rapido",
+      "tokens": [
+        "rapido"
+      ],
+      "industry": "Mobility"
+    },
+    {
+      "name": "Udaan",
+      "tokens": [
+        "udaan"
+      ],
+      "industry": "E-commerce"
+    },
+    {
+      "name": "Glance",
+      "tokens": [
+        "glance"
+      ],
+      "industry": "Media"
+    },
+    {
+      "name": "Perfios",
+      "tokens": [
+        "perfios"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Signzy",
+      "tokens": [
+        "signzy"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Sirion",
+      "tokens": [
+        "sirion"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Tessell",
+      "tokens": [
+        "tessell"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Scaler",
+      "tokens": [
+        "scaler"
+      ],
+      "industry": "Edtech"
+    },
+    {
+      "name": "Wiz",
+      "tokens": [
+        "wiz"
+      ],
+      "industry": "Enterprise IT"
+    },
+    {
+      "name": "Anthropic",
+      "tokens": [
+        "anthropic"
+      ],
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Snyk",
+      "tokens": [
+        "snyk"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Deel",
+      "tokens": [
+        "deel"
+      ],
+      "industry": "SaaS"
+    },
+    {
+      "name": "Rapyd",
+      "tokens": [
+        "rapyd"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Chime",
+      "tokens": [
+        "chime"
+      ],
+      "industry": "Fintech"
+    },
+    {
+      "name": "Sentry",
+      "tokens": [
+        "sentry"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Temporal",
+      "tokens": [
+        "temporal",
+        "temporaltechnologies"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Grafana Labs",
+      "tokens": [
+        "grafanalabs",
+        "grafana"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "HashiCorp",
+      "tokens": [
+        "hashicorp"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Canonical",
+      "tokens": [
+        "canonical"
+      ],
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Sarvam AI",
+      "tokens": [
+        "sarvam",
+        "sarvamai"
+      ],
+      "fundingStage": "series-a",
+      "estimated": true,
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Composio",
+      "tokens": [
+        "composio"
+      ],
+      "fundingStage": "seed",
+      "estimated": true,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Portkey",
+      "tokens": [
+        "portkey"
+      ],
+      "fundingStage": "seed",
+      "estimated": true,
+      "industry": "Developer tools"
+    },
+    {
+      "name": "Atomicwork",
+      "tokens": [
+        "atomicwork"
+      ],
+      "fundingStage": "series-a",
+      "estimated": true,
+      "industry": "SaaS"
+    },
+    {
+      "name": "Lyzr",
+      "tokens": [
+        "lyzr"
+      ],
+      "fundingStage": "seed",
+      "estimated": true,
+      "industry": "AI / Data"
+    },
+    {
+      "name": "Hexo",
+      "tokens": [
+        "hexo"
+      ],
+      "fundingStage": "seed",
+      "estimated": true,
+      "industry": "Developer tools"
+    }
   ]
 }

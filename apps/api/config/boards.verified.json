@@ -1,0 +1,190 @@
+{
+  "_generated": "by discover on 2026-10-27T12:12:49.757Z; verified against the live APIs",
+  "boards": [
+    {
+      "ats": "greenhouse",
+      "token": "databricks",
+      "companyName": "Databricks",
+      "industry": "AI / Data",
+      "hqCity": "Bengaluru",
+      "employees": 7000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "mongodb",
+      "companyName": "MongoDB",
+      "industry": "Developer tools",
+      "hqCity": "Gurugram",
+      "employees": 5000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "okta",
+      "companyName": "Okta",
+      "industry": "Enterprise IT",
+      "hqCity": "Bengaluru",
+      "employees": 5000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "cloudflare",
+      "companyName": "Cloudflare",
+      "industry": "Developer tools",
+      "hqCity": "Bengaluru",
+      "employees": 4000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "gitlab",
+      "companyName": "GitLab",
+      "industry": "Developer tools",
+      "hqCity": "Remote",
+      "employees": 2000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "coinbase",
+      "companyName": "Coinbase",
+      "industry": "Fintech",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "rubrik",
+      "companyName": "Rubrik",
+      "industry": "Enterprise IT",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "purestorage",
+      "companyName": "Pure Storage",
+      "industry": "Enterprise IT",
+      "employees": 5000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "toast",
+      "companyName": "Toast",
+      "industry": "Fintech",
+      "employees": 5000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "fivetran",
+      "companyName": "Fivetran",
+      "industry": "AI / Data",
+      "employees": 1500,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "druva",
+      "companyName": "Druva",
+      "industry": "Enterprise IT",
+      "employees": 1000,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "lever",
+      "token": "mindtickle",
+      "companyName": "Mindtickle",
+      "industry": "SaaS",
+      "employees": 600,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "ashby",
+      "token": "atlan",
+      "companyName": "Atlan",
+      "industry": "AI / Data",
+      "employees": 400,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "zenoti",
+      "companyName": "Zenoti",
+      "industry": "SaaS",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "glance",
+      "companyName": "Glance",
+      "industry": "Media",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "ashby",
+      "token": "sarvam",
+      "companyName": "Sarvam AI",
+      "industry": "AI / Data",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "sigmoid",
+      "companyName": "Sigmoid",
+      "industry": "AI / Data",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "newrelic",
+      "companyName": "New Relic",
+      "industry": "Developer tools",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "harnessinc",
+      "companyName": "Harness",
+      "industry": "Developer tools",
+      "employees": 1200,
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "singlestore",
+      "companyName": "SingleStore",
+      "industry": "Developer tools",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    },
+    {
+      "ats": "greenhouse",
+      "token": "zoominfo",
+      "companyName": "Zoominfo",
+      "industry": "SaaS",
+      "estimated": true,
+      "source": "assistant estimate from general knowledge, unverified"
+    }
+  ]
+}

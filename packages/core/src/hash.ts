@@ -38,3 +38,24 @@ export function canonicalJobKey(parts: { company: string; title: string; city?: 
     .map((p) => normalizeForHash(p))
     .join('|');
 }
+
+/** Overlapping word triples of the normalised text; the basis for near-duplicate detection. */
+export function shingles(text: string, size = 3): Set<string> {
+  const w = normalizeForHash(text).split(' ').filter(Boolean);
+  const out = new Set<string>();
+  for (let i = 0; i + size <= w.length; i++) out.add(w.slice(i, i + size).join(' '));
+  if (out.size === 0 && w.length) out.add(w.join(' '));
+  return out;
+}
+
+/** Jaccard similarity of two shingle sets (1 = identical text, 0 = nothing shared). */
+export function jaccard(a: Set<string>, b: Set<string>): number {
+  if (a.size === 0 && b.size === 0) return 1;
+  let inter = 0;
+  for (const x of a) if (b.has(x)) inter++;
+  return inter / (a.size + b.size - inter);
+}
+
+export function textSimilarity(a: string, b: string): number {
+  return jaccard(shingles(a), shingles(b));
+}

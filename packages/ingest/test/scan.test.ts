@@ -68,13 +68,20 @@ describe('buildScan', () => {
     const b = boardOf('dupco', 'mid', 'lever'); // same company on a second ATS
     const p1 = posting(a, { title: 'Backend Engineer' });
     const sameText = posting(b, { title: 'Backend Engineer II', description: p1.description });
-    const sameKey = posting(b, { title: 'Backend Engineer', description: body(999, 'different text') });
+    const sameKey = posting(b, { title: 'Backend Engineer', description: p1.description + '\nApply today.' }); // near-identical
     const o = buildScan([ok(a, [p1]), ok(b, [sameText, sameKey])], req({ acceptedRoleIds: ['backend'] }));
     expect(o.summary.valid).toBe(1);
     expect(o.summary.duplicates).toBe(2);
     expect(o.verdicts.filter((v) => v.status === 'duplicate').every((v) => v.duplicateOf === p1.ats + ':dupco:' + p1.externalId)).toBe(true);
   });
 
+  it('keeps same company+title+city postings whose text differs (different teams)', () => {
+    const b = boardOf('teams', 'mid');
+    const mk = (i: number, team: string) => posting(b, { title: 'Software Engineer', description: `About the ${team} team\nWe own the ${team} product line and ship weekly to enterprise customers.\n\nWhat you'll do\n- Design, build and operate ${team} services in production with a small autonomous group\n- Partner with ${team} product managers on roadmap and quality\n\nRequirements\n- 3+ years of professional experience\n- Strong proficiency in TypeScript and Node.js for ${team} workloads (${i})\n- Hands-on experience with PostgreSQL` });
+    const o = buildScan([ok(b, [mk(1, 'payments'), mk(2, 'search'), mk(3, 'identity')])], req());
+    expect(o.summary.valid).toBe(3);
+    expect(o.summary.duplicates).toBe(0);
+  });
   it('rejects with a stated reason and counts each', () => {
     const b = boardOf('mixed', 'mid');
     const o = buildScan(

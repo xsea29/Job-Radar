@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { buildScan, defaultRequest } from '@jobradar/ingest';
-import { createPglite, migrate, saveScan, seedReference, skillCountsFromRows, type Db } from '../src';
+import { createPglite, migrate, saveScan, seedReference, skillCountsFromRows, verifyEvidenceOffsets, type Db } from '../src';
 import { NOW, boardOf, ok, pool, posting } from './helpers';
 
 let db: Db;
@@ -18,7 +18,7 @@ beforeEach(async () => {
 describe('migrations', () => {
   it('apply once and are idempotent', async () => {
     expect(await migrate(db)).toEqual([]);
-    expect(await count(`SELECT count(*) n FROM schema_migrations`)).toBe(1);
+    expect(await count(`SELECT count(*) n FROM schema_migrations`)).toBe(2);
   });
   it('create every entity from the spec', async () => {
     const t = (await db.query<{ table_name: string }>(`SELECT table_name FROM information_schema.tables WHERE table_schema='public'`)).rows.map((r) => r.table_name);
@@ -110,6 +110,17 @@ describe('saveScan', () => {
     expect(await count(`SELECT count(*) n FROM scan_results WHERE scan_id=$1 AND status='rejected' AND reason='role_mismatch'`, [scanId])).toBe(1);
     const health = (await db.query<{ consecutive_failures: number; last_error: string }>(`SELECT consecutive_failures, last_error FROM source_boards sb JOIN companies c ON c.id=sb.company_id WHERE c.slug='down'`)).rows[0]!;
     expect(health).toEqual({ consecutive_failures: 1, last_error: 'HTTP 503' });
+  });
+});
+
+describe('evidence offsets with real-world text', () => {
+  it('stay recoverable when descriptions contain emoji / non-BMP characters (UTF-16 offsets)', async () => {
+    const b = boardOf('emoji', 'mid');
+    const p = posting(b, { title: 'Software Engineer', description: `About us\nWe ship fast 🚀🚀 and love our customers 😀.\n\nRequirements\n- 3+ years of professional experience\n- Strong proficiency in TypeScript and Kubernetes 🧑‍💻 on AWS\n- Hands-on experience with PostgreSQL\n\nNice to have\n- Docker is a plus 🐳\nWe value clear communication and ownership of what you ship in production.` });
+    const { scanId } = await save([ok(b, [p])]);
+    expect(await count(`SELECT count(*) n FROM skill_evidence`)).toBeGreaterThan(3);
+    expect(await verifyEvidenceOffsets(db, scanId)).toBe(0);
+    expect(await verifyEvidenceOffsets(db)).toBe(0);
   });
 });
 

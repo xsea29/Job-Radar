@@ -204,3 +204,18 @@ export async function skillCountsFromRows(db: Db, scanId: string): Promise<Map<s
   );
   return new Map(r.rows.map((x) => [x.skill_id, { jobs: Number(x.jobs), required: Number(x.required), preferred: Number(x.preferred) }]));
 }
+
+/**
+ * Every stored evidence span must be recoverable from the stored description
+ * using JS string slicing (offsets are UTF-16 code units). Returns the number
+ * of rows that are NOT, so 0 means fully traceable.
+ */
+export async function verifyEvidenceOffsets(db: Db, scanId?: string): Promise<number> {
+  const rows = await db.query<{ description: string; sentence: string; sent_start: number; sent_end: number; match_start: number; match_end: number; matched_text: string }>(
+    `SELECT d.description, e.sentence, e.sent_start, e.sent_end, e.match_start, e.match_end, e.matched_text
+       FROM skill_evidence e JOIN job_skills js ON js.id = e.job_skill_id JOIN job_description_snapshots d ON d.id = js.snapshot_id
+      ${scanId ? 'WHERE js.snapshot_id IN (SELECT snapshot_id FROM scan_results WHERE scan_id = $1)' : ''}`,
+    scanId ? [scanId] : [],
+  );
+  return rows.rows.filter((r) => r.description.slice(r.sent_start, r.sent_end) !== r.sentence || r.description.slice(r.match_start, r.match_end) !== r.matched_text).length;
+}

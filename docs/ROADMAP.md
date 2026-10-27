@@ -6,7 +6,8 @@
   - [x] Public-ATS adapters (Greenhouse/Lever/Ashby), retry/backoff/rate-limit, HTML→text
   - [x] Dedupe, relevance filters, quota-aware 100-job selection, disclosed broadening, `n/100` validation
   - [x] `scan` CLI
-  - [ ] **Verify adapters on live responses** (blocked: sandbox network policy)
+  - [x] Verified adapters on live responses; real scan 88/100 (partial); fixed role normaliser, near-duplicate rule, evidence-offset convention
+  - [ ] Reach 100: more product/startup boards, or widen role adjacency (Backend/Frontend for a Full-Stack target) — product decision
   - [ ] REST API (profiles, jobs, scans, market, trends, gaps, matches, reports, roadmap, notifications) with auth, validation, pagination, rate limits
   - [ ] Daily worker: discover → re-verify availability → expire/changed → extract → rematch → snapshot → report → notify (queue, retries, idempotent, multi-instance safe)
   - [ ] Replace `demoSource` with an `apiSource` in the app

@@ -2,7 +2,7 @@
 
 Evidence-based job-market intelligence for software engineers. JobRadar analyses **real job descriptions** (target: 100 distinct, verifiable postings per scan, split 35 startups / 30 mid-sized / 35 large companies) to show which skills employers actually require, which are growing or fading, and what *you* should learn next.
 
-> **Status.** Stage 1 (UI first) is complete: the mobile UI is interactive and runs on a clearly-labelled **demo dataset**. Stage 2 is under way: public-ATS ingestion (Greenhouse, Lever, Ashby), scan validation and the PostgreSQL schema/persistence are built and tested offline; **live ingestion is unverified until the sandbox network allows the ATS hosts**. REST API, workers and app↔API wiring are next. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/SOURCES.md](docs/SOURCES.md).
+> **Status.** Stage 1 (UI first) is complete: the mobile UI is interactive and runs on a clearly-labelled **demo dataset**. Stage 2 is under way: public-ATS ingestion (Greenhouse, Lever, Ashby), scan validation and the PostgreSQL schema/persistence are built and tested offline; **live ingestion is now verified on real postings (88/100 on the first real scan)**. REST API, workers and app↔API wiring are next. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/SOURCES.md](docs/SOURCES.md).
 
 ## Run it
 
@@ -21,13 +21,13 @@ On first launch you go through onboarding (or tap **Use the sample profile**). *
 ### Run a real scan (needs network access to the ATS hosts)
 
 ```bash
-npm run discover -w @jobradar/api            # tests the ~29 candidate companies in config/boards.candidates.json
+npm run discover -w @jobradar/api            # tests the candidate companies in config/boards.candidates*.json
                                               # against the live APIs → writes config/boards.json (verified boards only)
 npm run migrate -w @jobradar/api                                       # DATABASE_URL=postgres://… or local PGlite in .data/
 npm run scan -w @jobradar/api -- --boards config/boards.json --role fullstack --years 4
 ```
 
-It prints `n/100`, rejections by reason, duplicates, failures and every disclosed broadening step, and stores the scan, postings, versions, evidence and a demand snapshot. Without network access it fails honestly (`0/100 partial`).
+It prints `n/100`, rejections by reason, duplicates, failures and every disclosed broadening step, and stores the scan, postings, versions, evidence and a demand snapshot. Without network access it fails honestly (`0/100 partial`). Behind a proxy set `NODE_USE_ENV_PROXY=1` (and `NODE_EXTRA_CA_CERTS`); see [docs/SOURCES.md](docs/SOURCES.md). A real run on 21 verified boards produced `88/100` (partial).
 
 Android/iOS packaging uses Capacitor (`apps/mobile/capacitor.config.ts`):
 
