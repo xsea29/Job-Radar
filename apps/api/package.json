@@ -9,19 +9,24 @@
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/cli/migrate.ts",
     "scan": "tsx src/cli/scan.ts",
-    "discover": "tsx src/cli/discover.ts"
+    "discover": "tsx src/cli/discover.ts",
+    "serve": "tsx src/cli/serve.ts",
+    "daily": "tsx src/cli/daily.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.0",
     "@jobradar/core": "*",
     "@jobradar/ingest": "*",
+    "express": "^4.22.3",
     "pg": "^8.13.0",
     "zod": "^3.25.0"
   },
   "devDependencies": {
+    "@types/express": "^4.17.25",
     "@types/node": "^22.0.0",
     "@types/pg": "^8.11.0",
     "tsx": "^4.19.0",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@jobradar/demo": "*"
   }
 }

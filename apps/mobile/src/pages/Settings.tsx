@@ -7,6 +7,7 @@ import { Badge, Button, Card, Chip, List, Overline, Row, SectionHeader, Segmente
 import { Sheet } from '../components/ui/Sheet';
 import { lpaRange } from '../lib/format';
 import { useProfile } from '../state/profile';
+import { IS_DEMO } from '../data/source';
 import { useSettings, type DemoScenario, type ThemePref } from '../state/settings';
 import { AboutStep, CompensationStep, InterestsStep, PreferencesStep, ResumeStep, RoleStep, SkillsStep, Stepper, TimelineStep, type StepProps } from './onboarding/steps';
 
@@ -148,7 +149,7 @@ export default function Settings() {
         <Segmented label="Theme" value={settings.theme} onChange={(v: ThemePref) => updateSettings({ theme: v })} options={[{ value: 'system', label: 'System' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
       </section>
 
-      <section className="jr-stack">
+      {IS_DEMO && <section className="jr-stack">
         <SectionHeader title="Demo controls" subtitle="Only in the demo build: preview the app’s non-happy states." />
         <Card tone="accent" className="jr-stack">
           <div className="jr-cluster">
@@ -168,7 +169,7 @@ export default function Settings() {
           </div>
           <p className="jr-small">Switch scenario, then open Home, Market or Jobs to see how each state looks.</p>
         </Card>
-      </section>
+      </section>}
 
       <section className="jr-stack">
         <SectionHeader title="Data & privacy" subtitle="Your profile is stored on this device only in the demo build." />

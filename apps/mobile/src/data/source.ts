@@ -9,7 +9,11 @@ import type { DemoScenario } from '../state/settings';
  * Stage 2 : an `apiSource` will fetch the same shape from the backend
  *           (`GET /v1/evidence?role=…`). Nothing above this file changes.
  */
-export type Evidence = DemoDataset;
+export type Evidence = Omit<DemoDataset, 'provenance'> & { provenance: 'demo' | 'live' };
+
+/** Set VITE_API_URL (e.g. http://localhost:8787) to use real data instead of the labelled demo. */
+export const API_URL: string | undefined = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/$/, '') || undefined;
+export const IS_DEMO = !API_URL;
 
 export interface EvidenceSource {
   readonly provenance: 'demo' | 'live';
@@ -35,8 +39,24 @@ export const demoSource: EvidenceSource = {
       ds = buildDemoDataset({ now: NOW, roleId, scenario: sc });
       cache.set(key, ds);
     }
-    return ds;
+    return ds as Evidence;
   },
 };
 
-export const evidenceSource: EvidenceSource = demoSource;
+/** Real evidence from the JobRadar API. A 404 means "no scan yet"; anything else is an error, never silently empty. */
+export const apiSource: EvidenceSource = {
+  provenance: 'live',
+  async load({ roleId }) {
+    let res: Response;
+    try {
+      res = await fetch(`${API_URL}/v1/evidence?role=${roleId}`, { headers: { Accept: 'application/json' } });
+    } catch {
+      throw new Error('Could not reach the JobRadar service. Check your connection and try again.');
+    }
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`The JobRadar service returned an error (${res.status}).`);
+    return (await res.json()) as Evidence;
+  },
+};
+
+export const evidenceSource: EvidenceSource = API_URL ? apiSource : demoSource;

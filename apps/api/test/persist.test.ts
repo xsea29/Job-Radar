@@ -18,7 +18,7 @@ beforeEach(async () => {
 describe('migrations', () => {
   it('apply once and are idempotent', async () => {
     expect(await migrate(db)).toEqual([]);
-    expect(await count(`SELECT count(*) n FROM schema_migrations`)).toBe(2);
+    expect(await count(`SELECT count(*) n FROM schema_migrations`)).toBe(3);
   });
   it('create every entity from the spec', async () => {
     const t = (await db.query<{ table_name: string }>(`SELECT table_name FROM information_schema.tables WHERE table_schema='public'`)).rows.map((r) => r.table_name);

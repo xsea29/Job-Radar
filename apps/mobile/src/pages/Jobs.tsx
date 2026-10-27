@@ -56,7 +56,7 @@ function JobsContent({ a }: { a: Analysis }) {
     const list = a.jobs.filter(({ job, match }: JobView) => {
       if (query && !(`${job.title} ${job.companyName} ${job.skills.map((s) => s.canonicalName).join(' ')}`.toLowerCase().includes(query))) return false;
       if (filters.cats.length && !filters.cats.includes(job.companyCategory as CompanyCategory)) return false;
-      if (filters.arrangements.length && !filters.arrangements.includes(job.workArrangement)) return false;
+      if (filters.arrangements.length && !(job.workArrangement && filters.arrangements.includes(job.workArrangement))) return false;
       if (filters.cities.length && !(job.city && filters.cities.includes(job.city))) return false;
       if (filters.salaryMinLpa) {
         const top = job.salary?.max ?? job.salary?.min;

@@ -57,7 +57,8 @@ export interface JobPosting {
   sourceUrl: string;
   city?: string;
   country: string;
-  workArrangement: WorkArrangement;
+  /** Unknown when the source doesn't say; never guessed. */
+  workArrangement?: WorkArrangement;
   experience?: { min?: number; max?: number; raw: string };
   employmentType: 'full-time' | 'contract';
   postedAt?: string;

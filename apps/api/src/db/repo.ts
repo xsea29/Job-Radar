@@ -133,6 +133,8 @@ export interface SaveScanArgs {
   userId?: string | null;
   snapshotLabel: string;
   region?: string;
+  /** Daily refreshes pass false: trends only compare snapshots taken every few days. Default true. */
+  createSnapshot?: boolean;
 }
 
 /** Persist a whole scan atomically: postings, versions, extraction + evidence, results, source health, demand snapshot. */
@@ -152,9 +154,9 @@ export async function saveScan(db: Db, a: SaveScanArgs): Promise<{ scanId: strin
     }
 
     const scan = await tx.query<{ id: string }>(
-      `INSERT INTO scan_runs (user_id, role_id, region, target, quota_startup, quota_mid, quota_large, state, started_at, finished_at, retrieved, valid, duplicates, inaccessible, rejected, surplus_valid, criteria, broadening, warnings)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING id`,
-      [a.userId ?? null, req.targetRoleId, region, req.scan.target, req.scan.quotas.startup, req.scan.quotas.mid, req.scan.quotas.large, o.summary.state, a.startedAt.toISOString(), now, o.summary.retrieved, o.summary.valid, o.summary.duplicates, o.summary.inaccessible, o.summary.rejected, o.surplusValid, JSON.stringify(o.finalCriteria), JSON.stringify(o.broadening), JSON.stringify(o.summary.warnings)],
+      `INSERT INTO scan_runs (user_id, role_id, region, target, quota_startup, quota_mid, quota_large, state, started_at, finished_at, retrieved, valid, duplicates, inaccessible, rejected, surplus_valid, criteria, broadening, warnings, snapshot_created)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20) RETURNING id`,
+      [a.userId ?? null, req.targetRoleId, region, req.scan.target, req.scan.quotas.startup, req.scan.quotas.mid, req.scan.quotas.large, o.summary.state, a.startedAt.toISOString(), now, o.summary.retrieved, o.summary.valid, o.summary.duplicates, o.summary.inaccessible, o.summary.rejected, o.surplusValid, JSON.stringify(o.finalCriteria), JSON.stringify(o.broadening), JSON.stringify(o.summary.warnings), a.createSnapshot !== false],
     );
     const scanId = scan.rows[0]!.id;
 
@@ -180,6 +182,7 @@ export async function saveScan(db: Db, a: SaveScanArgs): Promise<{ scanId: strin
       );
     }
 
+    if (a.createSnapshot === false) return { scanId, snapshotId: '', changedJobs };
     const snap = snapshotFromOutcome(o, { id: scanId, label: a.snapshotLabel, roleId: req.targetRoleId, region, experienceBand: `${req.experience.min}–${req.experience.max} yrs`, startDate: a.startedAt.toISOString(), endDate: now });
     const sid = await tx.query<{ id: string }>(
       `INSERT INTO skill_demand_snapshots (scan_id, label, start_date, end_date, n, role_id, region, experience_band, company_mix, provenance) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'live') RETURNING id`,

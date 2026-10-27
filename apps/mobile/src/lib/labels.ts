@@ -35,7 +35,8 @@ export const STATUS_LABEL: Record<JobStatus, string> = {
   unverified: 'Not re-verified',
 };
 
-export function jobLocation(city: string | undefined, arrangement: WorkArrangement): string {
+export function jobLocation(city: string | undefined, arrangement: WorkArrangement | undefined): string {
+  if (!arrangement) return city ?? 'India';
   if (arrangement === 'remote') return city ? `Remote · ${city}` : 'Remote · India';
   return `${city ?? 'India'} · ${ARRANGEMENT_LABEL[arrangement]}`;
 }

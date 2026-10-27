@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { DEMO_NOTICE } from '@jobradar/demo';
 import { Sheet } from './Sheet';
 import { Button } from './Primitives';
+import { IS_DEMO } from '../../data/source';
 
 export function Logo() {
   return (
@@ -19,6 +20,7 @@ export function Logo() {
 /** Visible on every screen while the app is showing synthetic data. */
 export function DemoPill() {
   const [open, setOpen] = useState(false);
+  if (!IS_DEMO) return <span className="jr-live-pill" title="Showing real, retrieved job postings">Live data</span>;
   return (
     <>
       <button type="button" className="jr-demo-pill" onClick={() => setOpen(true)} aria-label="Demo data. Tap to learn what this means">

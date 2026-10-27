@@ -4,3 +4,7 @@ export * from './db/pglite';
 export * from './db/pg';
 export * from './db/connect';
 export * from './db/repo';
+export * from './evidence';
+export * from './worker';
+export * from './server';
+export * from './users';

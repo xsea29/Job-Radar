@@ -101,6 +101,7 @@ export function analyze(evidence: Evidence, profile: UserProfile, weights?: Matc
     const end = botRun - k * DAY;
     const start = end - DAY;
     const newJobs = jobs
+      .filter((j) => evidence.provenance !== 'live' || j.job.sample === 'new_since_scan') // live: only postings found after the scan
       .filter((j) => {
         const t = new Date(j.job.firstSeenAt).getTime();
         return t > start && t <= end;

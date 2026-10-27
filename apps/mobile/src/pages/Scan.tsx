@@ -8,6 +8,7 @@ import { Page } from '../components/ui/Page';
 import { Badge, Button, Card, List, Overline, ProgressBar, Row } from '../components/ui/Primitives';
 import { ErrorState, PageSkeleton } from '../components/ui/States';
 import { evidenceSource } from '../data/source';
+import { IS_DEMO } from '../data/source';
 import { useProfile } from '../state/profile';
 import { useSettings } from '../state/settings';
 
@@ -17,9 +18,14 @@ const ease = (p: number) => 1 - Math.pow(1 - p, 1.6);
 const TICKS = 64;
 
 export default function Scan() {
+  return IS_DEMO ? <DemoScan /> : <LiveScanInfo />;
+}
+
+function DemoScan() {
   const { profile } = useProfile();
   const { settings, update } = useSettings();
   const nav = useNavigate();
+
   const loc = useLocation();
   const auto = new URLSearchParams(loc.search).get('auto') === '1';
   const sc = settings.scenario === 'partial' ? 'partial' : 'complete';
@@ -245,5 +251,20 @@ function Counter({ label, v }: { label: string; v: number }) {
       <span className="mono jr-counter__v">{v}</span>
       <span className="jr-small jr-muted">{label}</span>
     </div>
+  );
+}
+
+function LiveScanInfo() {
+  const nav = useNavigate();
+  return (
+    <Page title="Scans" backHref="/tabs/home">
+      <div className="jr-stack">
+        <h1 className="jr-h1">Scans run on the server</h1>
+        <p className="jr-muted">Real scans read public job boards and take a while, so they run on a schedule (daily) rather than on your phone. The latest result, its failures and every widening step are in Data transparency.</p>
+      </div>
+      <Button block onClick={() => nav('/transparency')}>
+        Open data transparency
+      </Button>
+    </Page>
   );
 }

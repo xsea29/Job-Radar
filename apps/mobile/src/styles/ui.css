@@ -901,3 +901,13 @@ ion-toolbar {
   min-width: 72px;
   white-space: nowrap;
 }
+
+.jr-live-pill {
+  flex: none;
+  background: var(--success-soft);
+  color: var(--success);
+  font-weight: 650;
+  font-size: 13px;
+  padding: 7px 12px;
+  border-radius: 10px;
+}

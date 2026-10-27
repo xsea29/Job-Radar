@@ -2,7 +2,7 @@
 
 Evidence-based job-market intelligence for software engineers. JobRadar analyses **real job descriptions** (target: 100 distinct, verifiable postings per scan, split 35 startups / 30 mid-sized / 35 large companies) to show which skills employers actually require, which are growing or fading, and what *you* should learn next.
 
-> **Status.** Stage 1 (UI first) is complete: the mobile UI is interactive and runs on a clearly-labelled **demo dataset**. Stage 2 is under way: public-ATS ingestion (Greenhouse, Lever, Ashby), scan validation and the PostgreSQL schema/persistence are built and tested offline; **live ingestion is now verified on real postings (88/100 on the first real scan)**. REST API, workers and app↔API wiring are next. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/SOURCES.md](docs/SOURCES.md).
+> **Status.** Stage 1 (UI first) is complete: the mobile UI is interactive and runs on a clearly-labelled **demo dataset**. Stage 2 is done: public-ATS ingestion (Greenhouse, Lever, Ashby), scan validation, PostgreSQL schema/persistence, daily worker, REST API and app↔API wiring, **verified on real postings (88/100 on the first real scan)**. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/SOURCES.md](docs/SOURCES.md).
 
 ## Run it
 
@@ -28,6 +28,17 @@ npm run scan -w @jobradar/api -- --boards config/boards.json --role fullstack --
 ```
 
 It prints `n/100`, rejections by reason, duplicates, failures and every disclosed broadening step, and stores the scan, postings, versions, evidence and a demand snapshot. Without network access it fails honestly (`0/100 partial`). Behind a proxy set `NODE_USE_ENV_PROXY=1` (and `NODE_EXTRA_CA_CERTS`); see [docs/SOURCES.md](docs/SOURCES.md). A real run on 21 verified boards produced `88/100` (partial).
+
+### Run the backend and point the app at it
+
+```bash
+export JWT_SECRET="$(openssl rand -base64 48)"           # required, ≥ 32 chars
+npm run daily -w @jobradar/api                           # fetch → extract → store → expire vanished postings → reports (once per UTC day; run from cron)
+npm run serve -w @jobradar/api                           # REST API on :8787 (DATABASE_URL=postgres://… in production)
+VITE_API_URL=http://localhost:8787 npm run dev           # app now shows real data ("Live data" pill) instead of the demo
+```
+
+API (all JSON, `/v1`): `auth/register|login`, `DELETE me`, `evidence`, `market`, `jobs` (+`/:id`), `scans` (+`POST scans/run`), `profile`, `matches`, `gap` (with roadmap), `reports`, `notifications/preferences`, `learning/progress`, `health`. Validation (zod), pagination, scrypt-hashed passwords, HS256 bearer tokens, auth rate limiting, no request bodies in logs.
 
 Android/iOS packaging uses Capacitor (`apps/mobile/capacitor.config.ts`):
 
