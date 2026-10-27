@@ -1,0 +1,175 @@
+/*
+ * JobRadar design tokens.
+ * Light is the default; dark applies via the OS setting or html[data-theme="dark"].
+ * Category colours (startup / mid / large) were validated with the dataviz
+ * palette validator on both surfaces; shapes (circle / diamond / square) are the
+ * second encoding channel so colour is never the only signal.
+ */
+:root {
+  --font-sans: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* surfaces */
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #eef0f3;
+  --surface-3: #e5e8ec;
+  --border: #e1e5ea;
+  --border-strong: #cdd3db;
+
+  /* ink */
+  --text: #131924;
+  --text-2: #454d5b;
+  --text-3: #626b79;
+
+  /* brand */
+  --primary: #006d74;
+  --primary-hover: #005a60;
+  --on-primary: #ffffff;
+  --primary-soft: #d6eeeb;
+  --primary-ink: #075055;
+
+  /* demo / caution accent */
+  --accent: #e2ad55;
+  --accent-soft: #fdecd0;
+  --accent-ink: #7a4a0a;
+  --accent-border: #e0ba8e;
+
+  /* status (always paired with an icon + label) */
+  --success: #1b7a4b;
+  --success-soft: #dcf2e6;
+  --warning: #96580a;
+  --warning-soft: #fdf0d5;
+  --danger: #b3382c;
+  --danger-soft: #fbe4e1;
+  --info: #2f5ea8;
+  --info-soft: #e1ebfa;
+
+  /* company categories (validated) */
+  --cat-startup: #cf7d00;
+  --cat-mid: #0098a8;
+  --cat-large: #5a56d0;
+
+  /* requirement encoding: one-hue ramp, dark = stronger requirement */
+  --req: #006d74;
+  --pref: #6fbcc0;
+  --ment: #c9d3da;
+
+  /* skill labels */
+  --lbl-foundational: #2f5ea8;
+  --lbl-established: #1b7a4b;
+  --lbl-growing: #0b7a86;
+  --lbl-emerging: #7a45b8;
+  --lbl-specialized: #96580a;
+  --lbl-declining: #b3382c;
+  --lbl-uncertain: #626b79;
+
+  --shadow-1: 0 1px 2px rgba(16, 24, 40, 0.05), 0 0 0 1px rgba(16, 24, 40, 0.03);
+  --shadow-2: 0 8px 24px rgba(16, 24, 40, 0.1);
+
+  --r-xs: 6px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-pill: 999px;
+
+  --gutter: 16px;
+  --tap: 44px;
+
+  --fs-display: 28px;
+  --fs-title: 20px;
+  --fs-section: 17px;
+  --fs-body: 15px;
+  --fs-small: 13px;
+  --fs-micro: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0f1419;
+    --surface: #171d25;
+    --surface-2: #1f2630;
+    --surface-3: #28313d;
+    --border: #28313c;
+    --border-strong: #3a4552;
+    --text: #e8ecf1;
+    --text-2: #b8c1cc;
+    --text-3: #8f9aa8;
+    --primary: #46bcc4;
+    --primary-hover: #6ccdd3;
+    --on-primary: #04282b;
+    --primary-soft: #12363a;
+    --primary-ink: #8fdde2;
+    --accent: #e0a94f;
+    --accent-soft: #3a2d14;
+    --accent-ink: #f0cd8e;
+    --accent-border: #6b5428;
+    --success: #5fd09a;
+    --success-soft: #12301f;
+    --warning: #f0b45a;
+    --warning-soft: #3a2a0e;
+    --danger: #f08277;
+    --danger-soft: #3d1a17;
+    --info: #86aef0;
+    --info-soft: #172a47;
+    --cat-startup: #c97e12;
+    --cat-mid: #1699a8;
+    --cat-large: #7872e0;
+    --req: #46bcc4;
+    --pref: #2a7a80;
+    --ment: #37424f;
+    --lbl-foundational: #86aef0;
+    --lbl-established: #5fd09a;
+    --lbl-growing: #4cc7d4;
+    --lbl-emerging: #b896e8;
+    --lbl-specialized: #f0b45a;
+    --lbl-declining: #f08277;
+    --lbl-uncertain: #8f9aa8;
+    --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.04);
+    --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #0f1419;
+  --surface: #171d25;
+  --surface-2: #1f2630;
+  --surface-3: #28313d;
+  --border: #28313c;
+  --border-strong: #3a4552;
+  --text: #e8ecf1;
+  --text-2: #b8c1cc;
+  --text-3: #8f9aa8;
+  --primary: #46bcc4;
+  --primary-hover: #6ccdd3;
+  --on-primary: #04282b;
+  --primary-soft: #12363a;
+  --primary-ink: #8fdde2;
+  --accent: #e0a94f;
+  --accent-soft: #3a2d14;
+  --accent-ink: #f0cd8e;
+  --accent-border: #6b5428;
+  --success: #5fd09a;
+  --success-soft: #12301f;
+  --warning: #f0b45a;
+  --warning-soft: #3a2a0e;
+  --danger: #f08277;
+  --danger-soft: #3d1a17;
+  --info: #86aef0;
+  --info-soft: #172a47;
+  --cat-startup: #c97e12;
+  --cat-mid: #1699a8;
+  --cat-large: #7872e0;
+  --req: #46bcc4;
+  --pref: #2a7a80;
+  --ment: #37424f;
+  --lbl-foundational: #86aef0;
+  --lbl-established: #5fd09a;
+  --lbl-growing: #4cc7d4;
+  --lbl-emerging: #b896e8;
+  --lbl-specialized: #f0b45a;
+  --lbl-declining: #f08277;
+  --lbl-uncertain: #8f9aa8;
+  --shadow-1: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.5);
+}

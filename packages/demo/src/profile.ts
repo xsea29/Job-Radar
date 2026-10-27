@@ -1,0 +1,37 @@
+import type { UserProfile } from '@jobradar/core';
+
+/** Demo persona used to pre-fill onboarding. Entirely fictional. */
+export const DEMO_PROFILE: UserProfile = {
+  name: 'Sagar',
+  currentRole: 'Software Engineer (Full-Stack)',
+  yearsExperience: 4,
+  targetRoleId: 'fullstack',
+  skills: [
+    { skillId: 'javascript', level: 'advanced' },
+    { skillId: 'typescript', level: 'intermediate' },
+    { skillId: 'react', level: 'advanced' },
+    { skillId: 'html-css', level: 'advanced' },
+    { skillId: 'redux', level: 'intermediate' },
+    { skillId: 'nodejs', level: 'intermediate' },
+    { skillId: 'express', level: 'intermediate' },
+    { skillId: 'mongodb', level: 'intermediate' },
+    { skillId: 'sql', level: 'intermediate' },
+    { skillId: 'postgresql', level: 'beginner' },
+    { skillId: 'rest', level: 'advanced' },
+    { skillId: 'git', level: 'advanced' },
+    { skillId: 'jest', level: 'intermediate' },
+    { skillId: 'docker', level: 'beginner' },
+    { skillId: 'aws', level: 'beginner' },
+    { skillId: 'agile', level: 'intermediate' },
+  ],
+  preferredSkillIds: ['typescript', 'nextjs', 'nodejs'],
+  salary: { current: 1_800_000, expectedMin: 2_800_000, expectedMax: 3_500_000 },
+  locations: { cities: ['Bengaluru', 'Hyderabad', 'Pune'], countries: ['India'], remote: true, hybrid: true, onsite: false },
+  companyCategories: [],
+  industries: [],
+  noticePeriodDays: 60,
+  switchTimeline: '3-6',
+  weeklyLearningHours: 6,
+  imports: {},
+  onboardingComplete: true,
+};

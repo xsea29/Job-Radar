@@ -1,0 +1,12 @@
+node_modules
+dist
+.vite
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+coverage
+# Capacitor generated platforms are created with `npx cap add`
+apps/mobile/android
+apps/mobile/ios

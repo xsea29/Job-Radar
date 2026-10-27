@@ -1,0 +1,498 @@
+/* Screen-specific styles. */
+
+/* ───────── Skill rows ───────── */
+.jr-skillrow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  background: transparent;
+  border: 0;
+  text-align: left;
+}
+.jr-skillrow:active {
+  background: var(--surface-2);
+}
+.jr-skillrow__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.jr-skillrow__name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 650;
+  font-size: 15px;
+}
+.jr-skillrow__count {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--text-2);
+}
+
+/* ───────── Home ───────── */
+.jr-greet {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.jr-greet__sub {
+  color: var(--text-2);
+  font-size: 15px;
+}
+.jr-evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 18px;
+}
+.jr-evidence__big {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.jr-evidence__num {
+  font-size: 38px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+.jr-evidence__text {
+  color: var(--text-2);
+}
+.jr-gapcard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.jr-quick {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-weight: 650;
+  cursor: pointer;
+  text-align: left;
+}
+.jr-quick ion-icon {
+  font-size: 22px;
+  color: var(--primary);
+}
+.jr-quick:active {
+  background: var(--surface-2);
+}
+
+/* ───────── Skill detail ───────── */
+.jr-bignum {
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+}
+.jr-bignum small {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--text-3);
+  font-family: var(--font-sans);
+}
+.jr-split3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.jr-split3__item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jr-split3__val {
+  font-size: 20px;
+  font-weight: 700;
+}
+.jr-split3__val small {
+  font-size: 12px;
+  color: var(--text-3);
+  font-weight: 500;
+}
+.jr-callout {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.jr-evitem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+}
+.jr-evitem:active {
+  background: var(--surface-2);
+}
+.jr-quote {
+  margin: 0;
+  padding: 2px 0 2px 12px;
+  border-left: 3px solid var(--border-strong);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.jr-mark-hit {
+  background: color-mix(in srgb, var(--primary) 20%, transparent);
+  color: inherit;
+  border-radius: 4px;
+  padding: 0 2px;
+  font-weight: 650;
+}
+
+/* ───────── Jobs ───────── */
+.jr-searchrow {
+  display: grid;
+  grid-template-columns: 1fr 46px;
+  gap: 8px;
+}
+.jr-filterbtn {
+  position: relative;
+  height: 46px;
+  width: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+}
+.jr-filterbtn__n {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--primary);
+  color: var(--on-primary);
+  font-size: 12px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  padding: 0 5px;
+}
+
+/* ───────── Job detail ───────── */
+.jr-match3 {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr auto;
+  gap: 12px;
+  align-items: start;
+  padding-bottom: 4px;
+}
+.jr-match3__item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+}
+.jr-match3__val {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+}
+.jr-match3__overall {
+  align-items: center;
+  text-align: center;
+}
+.jr-comp {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.jr-comp__label {
+  font-weight: 600;
+  font-size: 14px;
+}
+.jr-skillchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px 0 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  font-weight: 550;
+  font-size: 14px;
+  cursor: pointer;
+}
+.jr-skillchip ion-icon {
+  font-size: 18px;
+  color: var(--text-3);
+}
+.jr-skillchip.is-have {
+  border-color: color-mix(in srgb, var(--success) 45%, transparent);
+  background: var(--success-soft);
+}
+.jr-skillchip.is-have ion-icon {
+  color: var(--success);
+}
+.jr-skillchip small {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  padding: 1px 6px;
+  border-radius: 6px;
+}
+.jr-desc {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.jr-hl {
+  display: inline;
+  border: 0;
+  padding: 0 2px;
+  margin: 0;
+  border-radius: 4px;
+  font: inherit;
+  font-weight: 650;
+  color: inherit;
+  cursor: pointer;
+}
+.jr-hl--required {
+  background: color-mix(in srgb, var(--req) 24%, transparent);
+}
+.jr-hl--preferred {
+  background: color-mix(in srgb, var(--pref) 35%, transparent);
+}
+.jr-hl--mentioned {
+  background: var(--surface-3);
+}
+.jr-dl {
+  display: grid;
+  grid-template-columns: 110px 1fr;
+  gap: 8px 12px;
+  margin: 0;
+  font-size: 14px;
+}
+.jr-dl dt {
+  color: var(--text-3);
+}
+.jr-dl dd {
+  margin: 0;
+  min-width: 0;
+}
+.jr-wrap {
+  word-break: break-all;
+  font-size: 12px;
+}
+
+/* ───────── Skill gap ───────── */
+.jr-gaptitle {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.jr-gapscore {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+.jr-gapscore .mono {
+  font-weight: 700;
+  font-size: 18px;
+}
+.jr-term {
+  display: grid;
+  grid-template-columns: 138px 1fr 48px;
+  gap: 8px;
+  align-items: center;
+}
+.jr-term__bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.jr-term__bar > div {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 3px;
+}
+.jr-term .mono {
+  text-align: right;
+}
+
+.jr-card--flush > .jr-collapse:first-child {
+  border-top: 0;
+}
+.jr-iconbox {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  display: grid;
+  place-items: center;
+  font-size: 21px;
+}
+
+/* ───────── Roadmap ───────── */
+.jr-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-size: 14.5px;
+}
+.jr-check__box {
+  flex: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 2px solid var(--border-strong);
+  display: grid;
+  place-items: center;
+  color: var(--on-primary);
+  font-size: 16px;
+}
+.jr-check.is-done .jr-check__box {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.jr-check.is-done span:last-child {
+  color: var(--text-3);
+  text-decoration: line-through;
+}
+
+/* ───────── Onboarding / forms ───────── */
+.jr-option {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  min-height: 64px;
+}
+.jr-option.is-selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.jr-levelrow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 16px;
+}
+.jr-levelrow + .jr-levelrow {
+  border-top: 1px solid var(--border);
+}
+.jr-levelrow__name {
+  font-weight: 650;
+}
+.jr-levelrow .jr-seg {
+  width: 100%;
+}
+.jr-addrow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+}
+.jr-hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 4px 0;
+  width: 100%;
+}
+
+.jr-ob-progress {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--gutter) 10px;
+}
+.jr-ob-foot {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+}
+ion-footer {
+  background: var(--bg);
+}
+.jr-point {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.jr-sumrow {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+.jr-sumrow + .jr-sumrow {
+  border-top: 1px solid var(--border);
+}
+.jr-sumrow__main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+/* ───────── Scan ───────── */
+.jr-counters {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.jr-counter {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.jr-counter__v {
+  font-size: 18px;
+  font-weight: 700;
+}
+.jr-counter .jr-small {
+  font-size: 11px;
+}
+
+.jr-gaptitle .jr-small {
+  font-weight: 400;
+}
