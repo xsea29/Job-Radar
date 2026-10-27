@@ -1,0 +1,8 @@
+{
+  "_readme": "Copy to boards.json. Each entry is ONE company's public ATS board. 'token' is the slug in the board URL (e.g. boards.greenhouse.io/<token>, jobs.lever.co/<token>, jobs.ashbyhq.com/<token>). Firmographics are optional and must come from a source you trust; without 'employees' the company stays 'unclassified' and is excluded from the 35/30/35 quotas rather than guessed.",
+  "boards": [
+    { "ats": "greenhouse", "token": "REPLACE_WITH_BOARD_TOKEN", "companyName": "Example Co (placeholder)", "industry": "SaaS", "hqCity": "Bengaluru", "employees": 120 },
+    { "ats": "lever", "token": "REPLACE_WITH_SITE_NAME", "companyName": "Example Two (placeholder)", "employees": 4500, "listed": true, "countries": 12 },
+    { "ats": "ashby", "token": "REPLACE_WITH_BOARD_NAME", "companyName": "Example Three (placeholder)" }
+  ]
+}

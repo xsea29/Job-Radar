@@ -8,6 +8,7 @@ import type { CompanyCategory } from './types';
 
 export type RejectionReason =
   | 'role_mismatch'
+  | 'employment_type'
   | 'experience_mismatch'
   | 'location_mismatch'
   | 'missing_description'
@@ -35,6 +36,7 @@ export const DEFAULT_SCAN_CONFIG: ScanConfig = {
 
 export const REJECTION_LABELS: Record<RejectionReason, string> = {
   role_mismatch: 'Role did not match target',
+  employment_type: 'Not a full-time or contract role',
   experience_mismatch: 'Experience outside range',
   location_mismatch: 'Location outside preferences',
   missing_description: 'Description missing or too short',
@@ -133,8 +135,11 @@ export function broadeningSteps(base: SearchCriteria): BroadeningStep[] {
   steps.push({ criteria: c, disclosure: `Publication window widened to ${c.postedWithinDays} days.` });
   c = { ...c, experienceMax: c.experienceMax + 2 };
   steps.push({ criteria: c, disclosure: `Maximum experience widened by 2 years (now ${c.experienceMin}–${c.experienceMax} yrs). Minimum unchanged.` });
-  c = { ...c, nearbyCities: true };
-  steps.push({ criteria: c, disclosure: 'Nearby cities in the same country included. Country unchanged.' });
+  // Only meaningful when the user restricted cities; otherwise it would change nothing.
+  if (base.cities.length > 0) {
+    c = { ...c, nearbyCities: true };
+    steps.push({ criteria: c, disclosure: 'Nearby cities in the same country included. Country unchanged.' });
+  }
   c = { ...c, postedWithinDays: Math.max(c.postedWithinDays, 90) };
   steps.push({ criteria: c, disclosure: `Publication window widened to ${c.postedWithinDays} days.` });
   return steps;

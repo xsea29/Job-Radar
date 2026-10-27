@@ -388,3 +388,10 @@ describe('coverage relations', () => {
     expect(g.items.find((i) => i.skillId === 'communication')).toBeUndefined();
   });
 });
+
+describe('broadening', () => {
+  it('does not claim to widen cities when none were restricted', () => {
+    const base = { roleIds: ['fullstack'], experienceMin: 3, experienceMax: 6, postedWithinDays: 30, countries: ['IN'], cities: [], nearbyCities: false };
+    expect(broadeningSteps(base).some((s) => /Nearby cities/.test(s.disclosure))).toBe(false);
+  });
+});

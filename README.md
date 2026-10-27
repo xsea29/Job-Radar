@@ -2,7 +2,7 @@
 
 Evidence-based job-market intelligence for software engineers. JobRadar analyses **real job descriptions** (target: 100 distinct, verifiable postings per scan, split 35 startups / 30 mid-sized / 35 large companies) to show which skills employers actually require, which are growing or fading, and what *you* should learn next.
 
-> **Status: Stage 1 (UI first) complete.** The full mobile UI is interactive and driven by a clearly-labelled **demo dataset**. The extraction, aggregation, trend, matching and gap engines are real, tested code; the backend, authorised-source ingestion, database and scheduler are Stage 2. See [docs/ROADMAP.md](docs/ROADMAP.md).
+> **Status.** Stage 1 (UI first) is complete: the mobile UI is interactive and runs on a clearly-labelled **demo dataset**. Stage 2 is under way: public-ATS ingestion (Greenhouse, Lever, Ashby), scan validation and the PostgreSQL schema/persistence are built and tested offline; **live ingestion is unverified until the sandbox network allows the ATS hosts**. REST API, workers and app↔API wiring are next. See [docs/ROADMAP.md](docs/ROADMAP.md) and [docs/SOURCES.md](docs/SOURCES.md).
 
 ## Run it
 
@@ -18,6 +18,16 @@ npm run build        # production web build → apps/mobile/dist
 
 On first launch you go through onboarding (or tap **Use the sample profile**). **More → Profile & settings → Demo controls** switches the app between *Complete 100/100*, *Partial 63/100*, *No scan yet*, *Service error* and *Slow loading* so every non-happy state can be reviewed.
 
+### Run a real scan (needs network access to the ATS hosts)
+
+```bash
+cp apps/api/config/boards.example.json apps/api/config/boards.json   # add real board tokens
+npm run migrate -w @jobradar/api                                       # DATABASE_URL=postgres://… or local PGlite in .data/
+npm run scan -w @jobradar/api -- --boards config/boards.json --role fullstack --years 4
+```
+
+It prints `n/100`, rejections by reason, duplicates, failures and every disclosed broadening step, and stores the scan, postings, versions, evidence and a demand snapshot. Without network access it fails honestly (`0/100 partial`).
+
 Android/iOS packaging uses Capacitor (`apps/mobile/capacitor.config.ts`):
 
 ```bash
@@ -31,7 +41,9 @@ cd apps/mobile && npm run cap:sync && npx cap add android   # or ios
 | `apps/mobile` | Ionic React + Vite + TypeScript app (Capacitor-ready). Screens in `src/pages`, design-system components in `src/components`, data seam in `src/data`. |
 | `packages/core` | **Real domain logic**, shared with the future backend: taxonomy, skill extractor, demand aggregation, trend classification, match scoring, gap prioritisation, scan validation, company-size classification, roadmap, daily report. |
 | `packages/demo` | **Synthetic** demo data: fictional companies, generated job descriptions (which are then run through the *real* extractor), earlier-snapshot aggregates, sources, scans. Never mix with production evidence. |
-| `docs/` | PRD, information architecture & design system, architecture & Stage 2 plan. |
+| `packages/ingest` | Public-ATS adapters (Greenhouse/Lever/Ashby), polite HTTP client, HTML→text, location/role normalisation, and the pure scan orchestrator (dedupe → relevance filters → quota-aware selection → disclosed broadening → `n/100` validation). |
+| `apps/api` | PostgreSQL migrations (`migrations/001_init.sql`), DB layer (`pg` in production, PGlite for dev/tests), scan persistence, and the `scan` CLI. |
+| `docs/` | PRD, information architecture & design system, architecture, data sources. |
 
 ## How honesty is enforced
 

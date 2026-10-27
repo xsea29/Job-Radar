@@ -1,7 +1,15 @@
 # Roadmap
 
 - [x] **Stage 1** — product docs, design system, full interactive UI, deterministic engines + tests, labelled demo data, non-happy states, dark mode.
-- [ ] **Stage 2** — DB + migrations; source adapters; ingestion/dedupe; extraction with evidence; 100-job scan validation; snapshots & trends; matching/gap APIs; daily worker + notifications; auth; replace `demoSource` with `apiSource`.
+- [~] **Stage 2** — in progress.
+  - [x] Postgres schema + migrations; persistence of scans, versions, evidence, snapshots (tested on PGlite)
+  - [x] Public-ATS adapters (Greenhouse/Lever/Ashby), retry/backoff/rate-limit, HTML→text
+  - [x] Dedupe, relevance filters, quota-aware 100-job selection, disclosed broadening, `n/100` validation
+  - [x] `scan` CLI
+  - [ ] **Verify adapters on live responses** (blocked: sandbox network policy)
+  - [ ] REST API (profiles, jobs, scans, market, trends, gaps, matches, reports, roadmap, notifications) with auth, validation, pagination, rate limits
+  - [ ] Daily worker: discover → re-verify availability → expire/changed → extract → rematch → snapshot → report → notify (queue, retries, idempotent, multi-instance safe)
+  - [ ] Replace `demoSource` with an `apiSource` in the app
 - [ ] **Stage 3** — verify with real permitted data; incomplete/failed-source and retry tests; native packaging; deployment, env vars, source terms and operating costs documented.
 
 ## Known Stage-1 limitations

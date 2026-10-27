@@ -10,3 +10,5 @@ coverage
 # Capacitor generated platforms are created with `npx cap add`
 apps/mobile/android
 apps/mobile/ios
+.data/
+apps/api/config/boards.json

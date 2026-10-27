@@ -10,8 +10,8 @@
   "scripts": {
     "dev": "npm run dev -w @jobradar/mobile",
     "build": "npm run build -w @jobradar/mobile",
-    "test": "npm run test -w @jobradar/core && npm run test -w @jobradar/demo && npm run test -w @jobradar/mobile",
-    "typecheck": "npm run typecheck -w @jobradar/core && npm run typecheck -w @jobradar/demo && npm run typecheck -w @jobradar/mobile",
+    "test": "npm run test --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint ."
   },
   "engines": {
