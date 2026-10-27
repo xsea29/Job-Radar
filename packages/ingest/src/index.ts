@@ -7,3 +7,4 @@ export { leverAdapter, parseLever } from './adapters/lever';
 export { ashbyAdapter, parseAshby } from './adapters/ashby';
 export { ADAPTERS } from './adapters';
 export * from './scan';
+export * from './discover';

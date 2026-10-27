@@ -1,0 +1,37 @@
+{
+  "_readme": "UNVERIFIED candidates. These are genuine companies I believe publish jobs on a public ATS and employ engineers in India, but the board slugs are GUESSES and the headcounts are rough ORDER-OF-MAGNITUDE estimates from general knowledge (not looked up). `npm run discover` tests every guess against the real APIs and keeps only boards that exist and have relevant postings; it never treats a network error as 'does not exist'. Sizes are deliberately set well away from the 200 / 3,000 boundaries; correct any you know better. Companies that don't hire engineers in India will simply show 0 relevant jobs and be dropped.",
+  "defaults": { "estimated": true, "source": "assistant estimate from general knowledge, unverified" },
+  "candidates": [
+    { "name": "Stripe", "tokens": ["stripe"], "ats": ["greenhouse"], "employees": 8000, "industry": "Fintech", "hqCity": "Bengaluru" },
+    { "name": "Databricks", "tokens": ["databricks"], "ats": ["greenhouse"], "employees": 7000, "industry": "AI / Data", "hqCity": "Bengaluru" },
+    { "name": "MongoDB", "tokens": ["mongodb"], "ats": ["greenhouse"], "employees": 5000, "industry": "Developer tools", "hqCity": "Gurugram" },
+    { "name": "Okta", "tokens": ["okta"], "ats": ["greenhouse"], "employees": 5000, "industry": "Enterprise IT", "hqCity": "Bengaluru" },
+    { "name": "Twilio", "tokens": ["twilio"], "ats": ["greenhouse"], "employees": 5000, "industry": "SaaS", "hqCity": "Bengaluru" },
+    { "name": "Airbnb", "tokens": ["airbnb"], "ats": ["greenhouse"], "employees": 6000, "industry": "Travel", "hqCity": "Bengaluru" },
+    { "name": "Datadog", "tokens": ["datadog"], "ats": ["greenhouse"], "employees": 6000, "industry": "Developer tools", "hqCity": "Bengaluru" },
+    { "name": "Cloudflare", "tokens": ["cloudflare"], "ats": ["greenhouse"], "employees": 4000, "industry": "Developer tools", "hqCity": "Bengaluru" },
+    { "name": "PhonePe", "tokens": ["phonepe"], "employees": 5000, "industry": "Fintech", "hqCity": "Bengaluru" },
+    { "name": "Swiggy", "tokens": ["swiggy"], "employees": 6000, "industry": "E-commerce", "hqCity": "Bengaluru" },
+    { "name": "Freshworks", "tokens": ["freshworks"], "employees": 5000, "industry": "SaaS", "hqCity": "Chennai" },
+
+    { "name": "GitLab", "tokens": ["gitlab"], "ats": ["greenhouse"], "employees": 2000, "industry": "Developer tools", "hqCity": "Remote" },
+    { "name": "Plaid", "tokens": ["plaid"], "ats": ["lever"], "employees": 1000, "industry": "Fintech" },
+    { "name": "Notion", "tokens": ["notion"], "ats": ["ashby"], "employees": 800, "industry": "SaaS" },
+    { "name": "Ramp", "tokens": ["ramp"], "ats": ["ashby"], "employees": 1000, "industry": "Fintech" },
+    { "name": "Vercel", "tokens": ["vercel"], "ats": ["greenhouse"], "employees": 700, "industry": "Developer tools" },
+    { "name": "Zapier", "tokens": ["zapier"], "ats": ["ashby", "lever"], "employees": 800, "industry": "SaaS", "hqCity": "Remote" },
+    { "name": "Postman", "tokens": ["postman"], "employees": 1000, "industry": "Developer tools", "hqCity": "Bengaluru" },
+    { "name": "CRED", "tokens": ["cred"], "employees": 1000, "industry": "Fintech", "hqCity": "Bengaluru" },
+    { "name": "Meesho", "tokens": ["meesho"], "employees": 1500, "industry": "E-commerce", "hqCity": "Bengaluru" },
+    { "name": "Groww", "tokens": ["groww"], "employees": 1500, "industry": "Fintech", "hqCity": "Bengaluru" },
+    { "name": "Chargebee", "tokens": ["chargebee"], "employees": 1000, "industry": "SaaS", "hqCity": "Chennai" },
+    { "name": "BrowserStack", "tokens": ["browserstack"], "employees": 1000, "industry": "Developer tools", "hqCity": "Mumbai" },
+    { "name": "Whatfix", "tokens": ["whatfix"], "employees": 700, "industry": "SaaS", "hqCity": "Bengaluru" },
+
+    { "name": "PostHog", "tokens": ["posthog"], "ats": ["ashby"], "employees": 100, "industry": "Developer tools", "hqCity": "Remote" },
+    { "name": "Linear", "tokens": ["linear"], "ats": ["ashby", "lever"], "employees": 100, "industry": "SaaS", "hqCity": "Remote" },
+    { "name": "Replit", "tokens": ["replit"], "ats": ["ashby"], "employees": 150, "industry": "Developer tools" },
+    { "name": "Hasura", "tokens": ["hasura"], "employees": 100, "industry": "Developer tools", "hqCity": "Bengaluru" },
+    { "name": "Cal.com", "tokens": ["cal", "calcom"], "ats": ["ashby"], "employees": 50, "industry": "SaaS", "hqCity": "Remote" }
+  ]
+}

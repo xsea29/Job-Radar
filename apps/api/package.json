@@ -8,7 +8,8 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "migrate": "tsx src/cli/migrate.ts",
-    "scan": "tsx src/cli/scan.ts"
+    "scan": "tsx src/cli/scan.ts",
+    "discover": "tsx src/cli/discover.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.0",

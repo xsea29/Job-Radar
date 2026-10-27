@@ -21,7 +21,8 @@ On first launch you go through onboarding (or tap **Use the sample profile**). *
 ### Run a real scan (needs network access to the ATS hosts)
 
 ```bash
-cp apps/api/config/boards.example.json apps/api/config/boards.json   # add real board tokens
+npm run discover -w @jobradar/api            # tests the ~29 candidate companies in config/boards.candidates.json
+                                              # against the live APIs → writes config/boards.json (verified boards only)
 npm run migrate -w @jobradar/api                                       # DATABASE_URL=postgres://… or local PGlite in .data/
 npm run scan -w @jobradar/api -- --boards config/boards.json --role fullstack --years 4
 ```

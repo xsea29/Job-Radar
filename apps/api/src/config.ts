@@ -14,6 +14,8 @@ const Board = z.object({
   listed: z.boolean().optional(),
   countries: z.number().int().positive().optional(),
   manualCategory: z.enum(['startup', 'mid', 'large']).optional(),
+  source: z.string().optional(),
+  estimated: z.boolean().optional(),
   region: z.enum(['eu']).optional(),
 });
 

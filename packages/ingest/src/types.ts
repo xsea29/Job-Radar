@@ -22,6 +22,8 @@ export interface BoardConfig {
   listed?: boolean;
   countries?: number;
   manualCategory?: CompanyCategory;
+  source?: string;
+  estimated?: boolean;
   /** Lever EU tenants use api.eu.lever.co. */
   region?: 'eu';
 }

@@ -63,6 +63,11 @@ describe('classifyCompany', () => {
     expect(classifyCompany({ employees: 210 }).confidence).toBe('low');
     expect(classifyCompany({ employees: 60 }).confidence).toBe('high');
   });
+  it('caps confidence for estimated headcounts and says so', () => {
+    const c = classifyCompany({ employees: 8000, estimated: true, source: 'assistant estimate' });
+    expect(c).toMatchObject({ category: 'large', confidence: 'medium' });
+    expect(c.explanation).toMatch(/rough estimate \(assistant estimate\)/);
+  });
   it('does not guess when data is missing', () => {
     const c = classifyCompany({});
     expect(c.category).toBe('unclassified');

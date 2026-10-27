@@ -40,6 +40,10 @@ export interface CompanyFirmographics {
   listed?: boolean;
   countries?: number;
   manualCategory?: CompanyCategory;
+  /** Where the figures came from, shown to the user (e.g. "assistant estimate, unverified"). */
+  source?: string;
+  /** Rough or unverified headcount: confidence is capped below "high". */
+  estimated?: boolean;
 }
 
 const EARLY_STAGES = new Set(['pre-seed', 'seed', 'series-a', 'series-b']);
@@ -71,11 +75,12 @@ export function classifyCompany(
       explanation = `~${n.toLocaleString('en-IN')} employees (≥ ${(cfg.midMax + 1).toLocaleString('en-IN')}).`;
     }
     const nearEdge = [cfg.startupMax + 1, cfg.midMax + 1].some((t) => Math.abs(n - t) / t <= cfg.ambiguityBand);
+    const note = [nearEdge ? 'Near a size boundary, so the category is approximate.' : '', f.estimated ? `Headcount is a rough estimate${f.source ? ` (${f.source})` : ''}.` : f.source ? `Source: ${f.source}.` : ''].filter(Boolean).join(' ');
     return {
       category,
       basis,
-      confidence: nearEdge ? 'low' : 'high',
-      explanation: nearEdge ? `${explanation} Near a size boundary, so the category is approximate.` : explanation,
+      confidence: nearEdge ? 'low' : f.estimated ? 'medium' : 'high',
+      explanation: note ? `${explanation} ${note}` : explanation,
     };
   }
   if (f.fundingStage) {
