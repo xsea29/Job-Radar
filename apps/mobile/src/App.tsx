@@ -2,6 +2,7 @@ import { IonApp, IonIcon, IonLabel, IonRouterOutlet, IonTabBar, IonTabButton, Io
 import { IonReactRouter } from '@ionic/react-router';
 import { briefcase, briefcaseOutline, ellipsisHorizontalCircle, ellipsisHorizontalCircleOutline, home, homeOutline, radio, radioOutline, statsChart, statsChartOutline } from 'ionicons/icons';
 import { Navigate, Route, useLocation } from 'react-router-dom';
+import { useLiveUpdates } from './data/live';
 import { useProfile } from './state/profile';
 import Home from './pages/Home';
 import Market from './pages/Market';
@@ -64,6 +65,7 @@ function Start() {
 }
 
 export default function App() {
+  useLiveUpdates();
   return (
     <IonApp>
       <IonReactRouter>

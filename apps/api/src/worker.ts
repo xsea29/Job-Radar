@@ -1,7 +1,7 @@
 import { buildDailyReport, classifySkillTrend, computeDemand, computeGapAnalysis, computeMatch, concentration, getSkill, toMatchProfile, type DailyReport, type UserProfile } from '@jobradar/core';
 import { boardKey, buildScan, collectBoards, type BoardConfig, type FetchResult, type AdapterContext, type ScanRequest } from '@jobradar/ingest';
 import type { Db } from './db/types';
-import { saveScan } from './db/repo';
+import { persistPostings, saveScan } from './db/repo';
 import { loadEvidence } from './evidence';
 import { loadProfile } from './users';
 
@@ -15,22 +15,34 @@ export interface DailyDeps {
   now?: Date;
   /** Take a demand snapshot (for trends) only if the last one is at least this old. */
   snapshotEveryDays?: number;
+  /** Idempotency key date for the daily run (the scheduler passes its local calendar date). */
+  keyDate?: string;
+  /** Idempotency slot for a refresh run (the scheduler passes floor(now / interval)). */
+  slot?: number;
 }
+
+export type PipelineMode = 'daily' | 'refresh';
 
 export interface DailyResult {
   skipped?: 'already-ran' | 'locked';
+  mode?: PipelineMode;
   scanId?: string;
   snapshotCreated?: boolean;
   newlyExpired?: number;
+  newPostings?: number;
+  changedPostings?: number;
+  validPostings?: number;
+  failedBoards?: string[];
   reports?: number;
 }
 
 const DAY = 86_400_000;
+const STALE_RUN_MINUTES = 30;
 
 /**
- * Mark postings that vanished from a board we read successfully today as
- * expired. A board that failed to load proves nothing, so its postings are
- * left alone ("unverified" is not "gone").
+ * Mark postings that vanished from a board read successfully as expired. A
+ * board that failed to load proves nothing, so its postings are left alone
+ * ("unverified" is not "gone").
  */
 export async function expireMissing(db: Db, results: FetchResult[], at: Date): Promise<number> {
   let n = 0;
@@ -49,39 +61,75 @@ export async function expireMissing(db: Db, results: FetchResult[], at: Date): P
 }
 
 /**
- * The daily workflow. Idempotent per UTC date (worker_runs unique key) and safe
- * across several instances (advisory lock): fetch → dedupe/filter/extract →
- * persist (new + changed postings) → expire vanished postings → optional demand
- * snapshot → per-user matches, report and notification decisions.
+ * Claim a run slot. One run at a time across all instances (the claim step is
+ * serialised with a transaction-scoped advisory lock, which is safe with pooled
+ * connections), idempotent per key, and a crashed run's slot is retaken after 30 minutes.
  */
-export async function runDaily(d: DailyDeps): Promise<DailyResult> {
+export async function claimRun(db: Db, kind: 'daily' | 'scan', key: string): Promise<'ok' | 'locked' | 'already-ran'> {
+  return db.transaction(async (tx) => {
+    await tx.query(`SELECT pg_advisory_xact_lock(hashtext('jobradar-claim'))`);
+    const busy = await tx.query(`SELECT 1 FROM worker_runs WHERE state='running' AND started_at > now() - interval '${STALE_RUN_MINUTES} minutes' LIMIT 1`);
+    if (busy.rows.length) return 'locked';
+    const r = await tx.query(
+      `INSERT INTO worker_runs (kind, run_key, state) VALUES ($1,$2,'running')
+       ON CONFLICT (kind, run_key) DO UPDATE SET state='running', started_at=now(), finished_at=NULL
+         WHERE worker_runs.state='failed' OR (worker_runs.state='running' AND worker_runs.started_at < now() - interval '${STALE_RUN_MINUTES} minutes')
+       RETURNING id`,
+      [kind, key],
+    );
+    return r.rows.length ? 'ok' : 'already-ran';
+  });
+}
+
+/**
+ * The scheduled workflow, in two modes sharing one code path.
+ *  - daily   : fetch → dedupe/filter/extract → persist new + changed postings → expire vanished
+ *              → record a scan (+ demand snapshot at most every few days) → per-user matches,
+ *              daily report and notification decisions.
+ *  - refresh : the same fetch/persist/expire, but no scan record, no snapshot and no reports:
+ *              cheap enough to run every few minutes so new postings show up promptly.
+ */
+export async function runPipeline(d: DailyDeps, mode: PipelineMode): Promise<DailyResult> {
   const now = d.now ?? new Date();
-  const key = `daily:${now.toISOString().slice(0, 10)}`;
-  const lock = await d.db.query<{ ok: boolean }>(`SELECT pg_try_advisory_lock(hashtext('jobradar-daily')) ok`);
-  if (!lock.rows[0]!.ok) return { skipped: 'locked' };
+  const key = mode === 'daily' ? `daily:${d.keyDate ?? now.toISOString().slice(0, 10)}` : `refresh:${d.slot ?? Math.floor(now.getTime() / 3_600_000)}`;
+  const claim = await claimRun(d.db, 'daily', key);
+  if (claim === 'locked') return { skipped: 'locked', mode };
+  if (claim === 'already-ran') return { skipped: 'already-ran', mode };
   try {
-    const claim = await d.db.query(`INSERT INTO worker_runs (kind, run_key, state) VALUES ('daily', $1, 'running') ON CONFLICT (kind, run_key) DO UPDATE SET state='running', started_at=now() WHERE worker_runs.state='failed' RETURNING id`, [key]);
-    if (claim.rows.length === 0) return { skipped: 'already-ran' };
-    try {
-      const results = await (d.collect ?? collectBoards)(d.boards, d.ctx);
-      const outcome = buildScan(results, { ...d.request, now });
+    const results = await (d.collect ?? collectBoards)(d.boards, d.ctx);
+    const base = { ...d.request, now };
+    // A refresh keeps every relevant posting (no 100-job cap): the cap belongs to the evidence base, not to tracking.
+    const request: ScanRequest = mode === 'refresh' ? { ...base, scan: { target: 5000, quotas: { startup: 1700, mid: 1600, large: 1700 } } } : base;
+    const outcome = buildScan(results, request);
+    // Track every relevant posting, not only the capped evidence base, so postings beyond the cap
+    // are not mistaken for "new" by the next refresh.
+    const tracked = mode === 'daily' ? buildScan(results, { ...base, scan: { target: 5000, quotas: { startup: 1700, mid: 1600, large: 1700 } } }) : outcome;
+    if (mode === 'daily') await d.db.transaction((tx) => persistPostings(tx, { boards: d.boards, outcome: tracked, at: now.toISOString() }));
+    let out: DailyResult;
+    if (mode === 'refresh') {
+      const p = await d.db.transaction((tx) => persistPostings(tx, { boards: d.boards, outcome, at: now.toISOString() }));
+      const newlyExpired = await expireMissing(d.db, results, now);
+      out = { mode, newPostings: p.newJobs, changedPostings: p.changedJobs, newlyExpired, validPostings: outcome.summary.valid, failedBoards: outcome.failedBoards };
+    } else {
       const last = await d.db.query<{ end_date: string }>(`SELECT max(end_date) end_date FROM skill_demand_snapshots WHERE provenance='live'`);
       const lastSnap = last.rows[0]?.end_date ? new Date(last.rows[0].end_date).getTime() : 0;
       const createSnapshot = now.getTime() - lastSnap >= (d.snapshotEveryDays ?? 7) * DAY;
-      const started = new Date(now.getTime() - 60_000);
-      const saved = await saveScan(d.db, { outcome, request: d.request, boards: d.boards, startedAt: started, finishedAt: now, snapshotLabel: now.toLocaleString('en-GB', { month: 'short', year: 'numeric' }), createSnapshot });
+      const saved = await saveScan(d.db, { outcome, request: d.request, boards: d.boards, startedAt: new Date(now.getTime() - 60_000), finishedAt: now, snapshotLabel: now.toLocaleString('en-GB', { month: 'short', year: 'numeric' }), createSnapshot });
       const newlyExpired = await expireMissing(d.db, results, now);
       const reports = await buildReports(d.db, now);
-      await d.db.query(`UPDATE worker_runs SET state='succeeded', finished_at=now(), detail=$2 WHERE kind='daily' AND run_key=$1`, [key, JSON.stringify({ valid: outcome.summary.valid, failedBoards: outcome.failedBoards, newlyExpired, reports, createSnapshot })]);
-      return { scanId: saved.scanId, snapshotCreated: createSnapshot, newlyExpired, reports };
-    } catch (e) {
-      await d.db.query(`UPDATE worker_runs SET state='failed', finished_at=now(), detail=$2 WHERE kind='daily' AND run_key=$1`, [key, JSON.stringify({ error: String(e) })]);
-      throw e;
+      out = { mode, scanId: saved.scanId, snapshotCreated: createSnapshot, newlyExpired, newPostings: saved.newJobs, changedPostings: saved.changedJobs, validPostings: outcome.summary.valid, failedBoards: outcome.failedBoards, reports };
     }
-  } finally {
-    await d.db.query(`SELECT pg_advisory_unlock(hashtext('jobradar-daily'))`);
+    await d.db.query(`UPDATE worker_runs SET state='succeeded', finished_at=now(), detail=$2 WHERE kind='daily' AND run_key=$1`, [key, JSON.stringify(out)]);
+    return out;
+  } catch (e) {
+    await d.db.query(`UPDATE worker_runs SET state='failed', finished_at=now(), detail=$2 WHERE kind='daily' AND run_key=$1`, [key, JSON.stringify({ error: String(e) })]);
+    throw e;
   }
 }
+
+/** The once-a-day run (kept as the stable entry point for the CLI and tests). */
+export const runDaily = (d: DailyDeps): Promise<DailyResult> => runPipeline(d, 'daily');
+export const runRefresh = (d: DailyDeps): Promise<DailyResult> => runPipeline(d, 'refresh');
 
 /** Per user: matches, daily report, notification decision (delivery history kept). */
 export async function buildReports(db: Db, now: Date): Promise<number> {

@@ -152,7 +152,7 @@ describe('daily worker', () => {
     const results = pool(15, 3);
     const first = await runDaily(deps(results, NOW));
     expect(first).toMatchObject({ snapshotCreated: true, reports: 1 });
-    expect(await runDaily(deps(results, NOW))).toEqual({ skipped: 'already-ran' });
+    expect(await runDaily(deps(results, NOW))).toEqual({ skipped: 'already-ran', mode: 'daily' });
     const second = await runDaily(deps(results, day(1)));
     expect(second.snapshotCreated).toBe(false); // < 7 days since the last snapshot
     expect(Number((await db.query<{ n: string }>(`SELECT count(*) n FROM skill_demand_snapshots`)).rows[0]!.n)).toBe(1);

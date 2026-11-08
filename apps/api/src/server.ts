@@ -2,18 +2,21 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import { z } from 'zod';
 import { classifySkillTrend, computeDemand, computeGapAnalysis, computeMatch, concentration, getSkill, buildRoadmap, toMatchProfile, type RoleId, type UserProfile } from '@jobradar/core';
 import type { Db } from './db/types';
+import type { EventHub } from './events';
 import { loadEvidence } from './evidence';
 import { hashPassword, loadProfile, saveProfile, signToken, verifyPassword, verifyToken } from './users';
 
 export interface ServerOptions {
   db: Db;
   jwtSecret: string;
-  /** Allowed browser origin for CORS (the app). */
+  /** Allowed browser origins for CORS: comma-separated, or '*'. Native app origins: https://localhost (Android), capacitor://localhost (iOS). */
   corsOrigin?: string;
   /** Requests per minute per IP on auth routes. */
   authRateLimit?: number;
   /** Optional trigger for an on-demand scan (wired to runDaily by the server entry). */
   runScan?: () => Promise<unknown>;
+  /** Live-update channel for connected apps (GET /v1/events). */
+  hub?: EventHub;
 }
 
 class HttpErr extends Error {
@@ -49,8 +52,14 @@ export function createApp(o: ServerOptions) {
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('Cache-Control', 'no-store');
-    if (o.corsOrigin) {
-      res.setHeader('Access-Control-Allow-Origin', o.corsOrigin);
+    const allowed = (o.corsOrigin ?? '').split(',').map((x) => x.trim()).filter(Boolean);
+    const origin = req.headers.origin;
+    if (allowed.length) {
+      if (allowed.includes('*')) res.setHeader('Access-Control-Allow-Origin', '*');
+      else if (origin && allowed.includes(origin)) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+        res.setHeader('Vary', 'Origin');
+      }
       res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
       res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
     }
@@ -76,7 +85,16 @@ export function createApp(o: ServerOptions) {
     return sub;
   };
 
-  app.get('/v1/health', wrap(async (_req, res) => { await o.db.query('SELECT 1'); res.json({ ok: true }); }));
+  app.get('/v1/health', wrap(async (_req, res) => {
+    await o.db.query('SELECT 1');
+    const last = (await o.db.query<{ finished_at: string; run_key: string }>(`SELECT finished_at, run_key FROM worker_runs WHERE state='succeeded' ORDER BY finished_at DESC LIMIT 1`)).rows[0];
+    res.json({ ok: true, lastRun: last ? { key: last.run_key, at: new Date(last.finished_at).toISOString() } : null, liveClients: o.hub?.size ?? 0 });
+  }));
+  app.get('/v1/events', (req, res) => {
+    if (!o.hub) return void res.status(501).json({ error: 'not_configured', message: 'Live updates are not enabled on this server.' });
+    o.hub.add(res);
+    req.on('close', () => res.end());
+  });
 
   // ── auth ──
   app.post('/v1/auth/register', limit, wrap(async (req, res) => {

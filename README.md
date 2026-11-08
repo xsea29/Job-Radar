@@ -29,6 +29,13 @@ npm run scan -w @jobradar/api -- --boards config/boards.json --role fullstack --
 
 It prints `n/100`, rejections by reason, duplicates, failures and every disclosed broadening step, and stores the scan, postings, versions, evidence and a demand snapshot. Without network access it fails honestly (`0/100 partial`). Behind a proxy set `NODE_USE_ENV_PROXY=1` (and `NODE_EXTRA_CA_CERTS`); see [docs/SOURCES.md](docs/SOURCES.md). A real run on 21 verified boards produced `88/100` (partial).
 
+### Real data, one command
+
+```bash
+npm install && npm run live      # API + built-in scheduler + app; first start fetches the real boards
+```
+The server needs no external cron: it runs a daily job and frequent refreshes itself and pushes updates to the open app. Details, Docker, environment variables and hosting: [docs/DEPLOY.md](docs/DEPLOY.md).
+
 ### Run the backend and point the app at it
 
 ```bash

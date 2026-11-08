@@ -1,7 +1,7 @@
 import { IonIcon } from '@ionic/react';
 import { play } from 'ionicons/icons';
 import { useNavigate } from 'react-router-dom';
-import type { Evidence } from '../../data/source';
+import { IS_DEMO, type Evidence } from '../../data/source';
 import { dateRange, dateTime } from '../../lib/format';
 import { Badge, Button, Card, Overline, ProgressBar } from '../ui/Primitives';
 
@@ -35,7 +35,7 @@ export function EvidenceCard({ evidence }: { evidence: Evidence }) {
           : `Collected ${dateRange(evidence.scan.startedAt, evidence.scan.finishedAt)}. Only ${s.valid} of ${s.target} valid descriptions could be retrieved, so this is not a completed scan.`}
       </p>
       <p className="jr-small jr-muted">
-        Daily bot ran {dateTime(evidence.botRanAt)} · {sourceHealthText(evidence.sources)}
+        {IS_DEMO ? 'Daily bot ran' : 'Last updated'} {dateTime(evidence.botRanAt)} · {sourceHealthText(evidence.sources)}
       </p>
       <div className="jr-grid-2">
         <Button onClick={() => nav('/tabs/jobs')}>View jobs</Button>

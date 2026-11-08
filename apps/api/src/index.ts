@@ -8,3 +8,5 @@ export * from './evidence';
 export * from './worker';
 export * from './server';
 export * from './users';
+export * from './scheduler';
+export * from './events';

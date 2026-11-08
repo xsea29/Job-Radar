@@ -137,21 +137,49 @@ export interface SaveScanArgs {
   createSnapshot?: boolean;
 }
 
+export interface PersistedPostings {
+  boardIds: Map<string, { boardId: string; companyId: string }>;
+  saved: Map<string, { jobId: string; snapshotId: string }>;
+  changedJobs: number;
+  newJobs: number;
+}
+
+/**
+ * Upsert companies, boards (with health from this fetch) and every selected
+ * posting (new → inserted, changed text → new version). Shared by full scans
+ * and the lightweight refresh.
+ */
+export async function persistPostings(tx: Db, args: { boards: BoardConfig[]; outcome: ScanOutcome; at: string }): Promise<PersistedPostings> {
+  const boardIds = new Map<string, { boardId: string; companyId: string }>();
+  for (const b of args.boards) {
+    const companyId = await upsertCompany(tx, b);
+    boardIds.set(boardKey(b), { boardId: await upsertBoard(tx, b, companyId), companyId });
+  }
+  for (const rep of args.outcome.sourceReports) {
+    const ids = boardIds.get(rep.boardKey);
+    if (ids) await recordBoardHealth(tx, ids.boardId, rep);
+  }
+  let changedJobs = 0;
+  let newJobs = 0;
+  const saved = new Map<string, { jobId: string; snapshotId: string }>();
+  for (const j of args.outcome.selected) {
+    const ids = boardIds.get(boardKey(j.board))!;
+    const before = await tx.query(`SELECT 1 FROM job_postings WHERE source_board_id=$1 AND external_id=$2`, [ids.boardId, j.posting.externalId]);
+    const r = await upsertJob(tx, j, ids.boardId, ids.companyId, args.at);
+    if (r.changed) changedJobs++;
+    if (before.rows.length === 0) newJobs++;
+    saved.set(j.id, r);
+  }
+  return { boardIds, saved, changedJobs, newJobs };
+}
+
 /** Persist a whole scan atomically: postings, versions, extraction + evidence, results, source health, demand snapshot. */
-export async function saveScan(db: Db, a: SaveScanArgs): Promise<{ scanId: string; snapshotId: string; changedJobs: number }> {
+export async function saveScan(db: Db, a: SaveScanArgs): Promise<{ scanId: string; snapshotId: string; changedJobs: number; newJobs: number }> {
   const { outcome: o, request: req } = a;
   const now = a.finishedAt.toISOString();
   const region = a.region ?? req.countries.join(', ');
   return db.transaction(async (tx) => {
-    const boardIds = new Map<string, { boardId: string; companyId: string }>();
-    for (const b of a.boards) {
-      const companyId = await upsertCompany(tx, b);
-      boardIds.set(boardKey(b), { boardId: await upsertBoard(tx, b, companyId), companyId });
-    }
-    for (const rep of o.sourceReports) {
-      const ids = boardIds.get(rep.boardKey);
-      if (ids) await recordBoardHealth(tx, ids.boardId, rep);
-    }
+    const { saved, changedJobs, newJobs } = await persistPostings(tx, { boards: a.boards, outcome: o, at: now });
 
     const scan = await tx.query<{ id: string }>(
       `INSERT INTO scan_runs (user_id, role_id, region, target, quota_startup, quota_mid, quota_large, state, started_at, finished_at, retrieved, valid, duplicates, inaccessible, rejected, surplus_valid, criteria, broadening, warnings, snapshot_created)
@@ -160,14 +188,6 @@ export async function saveScan(db: Db, a: SaveScanArgs): Promise<{ scanId: strin
     );
     const scanId = scan.rows[0]!.id;
 
-    let changedJobs = 0;
-    const saved = new Map<string, { jobId: string; snapshotId: string }>();
-    for (const j of o.selected) {
-      const ids = boardIds.get(boardKey(j.board))!;
-      const r = await upsertJob(tx, j, ids.boardId, ids.companyId, now);
-      if (r.changed) changedJobs++;
-      saved.set(j.id, r);
-    }
     for (const v of o.verdicts) {
       const s = saved.get(v.id);
       await tx.query(
@@ -181,8 +201,8 @@ export async function saveScan(db: Db, a: SaveScanArgs): Promise<{ scanId: strin
         [scanId, rep.boardKey, rep.status, rep.fetched, JSON.stringify(rep.skipped), rep.attempts, rep.httpStatus ?? null, rep.error ?? null, rep.retryable ?? null, rep.at],
       );
     }
+    if (a.createSnapshot === false) return { scanId, snapshotId: '', changedJobs, newJobs };
 
-    if (a.createSnapshot === false) return { scanId, snapshotId: '', changedJobs };
     const snap = snapshotFromOutcome(o, { id: scanId, label: a.snapshotLabel, roleId: req.targetRoleId, region, experienceBand: `${req.experience.min}–${req.experience.max} yrs`, startDate: a.startedAt.toISOString(), endDate: now });
     const sid = await tx.query<{ id: string }>(
       `INSERT INTO skill_demand_snapshots (scan_id, label, start_date, end_date, n, role_id, region, experience_band, company_mix, provenance) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,'live') RETURNING id`,
@@ -191,7 +211,7 @@ export async function saveScan(db: Db, a: SaveScanArgs): Promise<{ scanId: strin
     for (const [skillId, c] of Object.entries(snap.counts)) {
       await tx.query(`INSERT INTO skill_demand_counts (snapshot_id, skill_id, jobs, required, preferred) VALUES ($1,$2,$3,$4,$5)`, [sid.rows[0]!.id, skillId, c.jobs, c.required, c.preferred]);
     }
-    return { scanId, snapshotId: sid.rows[0]!.id, changedJobs };
+    return { scanId, snapshotId: sid.rows[0]!.id, changedJobs, newJobs };
   });
 }
 

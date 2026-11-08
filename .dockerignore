@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+.git
+.data
+**/dist
+apps/mobile/src
+apps/mobile/public
+docs
+*.log

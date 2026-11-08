@@ -12,7 +12,8 @@
     "build": "npm run build -w @jobradar/mobile",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "live": "node scripts/dev-live.mjs"
   },
   "engines": {
     "node": ">=22"

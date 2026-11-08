@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { analyze, type Analysis } from './analyze';
-import { evidenceSource } from './source';
+import { API_URL, evidenceSource } from './source';
 import { useProfile } from '../state/profile';
 import { useSettings } from '../state/settings';
 
@@ -18,5 +18,8 @@ export function useAnalysis() {
     },
     retry: false,
     staleTime: Infinity,
+    // Live mode: poll as a fallback to the push stream.
+    refetchInterval: API_URL ? 5 * 60_000 : false,
+    refetchOnWindowFocus: !!API_URL,
   });
 }

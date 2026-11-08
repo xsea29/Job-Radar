@@ -1,0 +1,28 @@
+# API + scheduler + PostgreSQL.   JWT_SECRET=$(openssl rand -base64 48) docker compose up -d
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: jobradar
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+      POSTGRES_DB: jobradar
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jobradar"]
+      interval: 5s
+      retries: 10
+  api:
+    build: .
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://jobradar:${POSTGRES_PASSWORD:-change-me}@db:5432/jobradar
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET (openssl rand -base64 48)}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      DAILY_AT: ${DAILY_AT:-06:00}
+      TIMEZONE: ${TIMEZONE:-Asia/Kolkata}
+      REFRESH_EVERY_MINUTES: ${REFRESH_EVERY_MINUTES:-60}
+    ports: ["8787:8787"]
+    restart: unless-stopped
+volumes:
+  pgdata:

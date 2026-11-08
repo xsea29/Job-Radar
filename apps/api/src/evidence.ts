@@ -55,19 +55,16 @@ export async function loadEvidence(db: Db, roleId?: RoleId): Promise<LiveEvidenc
   const runs = await q(`SELECT * FROM scan_runs WHERE provenance='live' AND state IN ('complete','partial') ${roleId ? 'AND role_id=$1' : ''} ORDER BY finished_at DESC`, roleId ? [roleId] : []);
   const base = runs.find((r) => r.snapshot_created);
   if (!base) return null;
-  const later = runs.filter((r) => new Date(r.finished_at) > new Date(base.finished_at));
-
   const results = await q(
     `SELECT sr.scan_id, sr.candidate_key, sr.job_id, sr.snapshot_id, sr.status, sr.reason, sr.detail, c.category
-       FROM scan_results sr LEFT JOIN job_postings jp ON jp.id = sr.job_id LEFT JOIN companies c ON c.id = jp.company_id WHERE sr.scan_id = ANY($1::uuid[])`,
-    [[base.id, ...later.map((r) => r.id)]],
+       FROM scan_results sr LEFT JOIN job_postings jp ON jp.id = sr.job_id LEFT JOIN companies c ON c.id = jp.company_id WHERE sr.scan_id = $1`,
+    [base.id],
   );
-  const baseRes = results.filter((r) => r.scan_id === base.id);
+  const baseRes = results;
   const baseJobIds = new Set(baseRes.filter((r) => r.status === 'valid').map((r) => r.job_id));
-  const newIds = new Set<string>();
-  const snapshotFor = new Map<string, string>();
-  for (const r of results) if (r.status === 'valid') snapshotFor.set(r.job_id, r.scan_id === base.id || !snapshotFor.has(r.job_id) ? r.snapshot_id : snapshotFor.get(r.job_id)!);
-  for (const r of results) if (r.scan_id !== base.id && r.status === 'valid' && !baseJobIds.has(r.job_id)) newIds.add(r.job_id);
+  // "New since scan": relevant postings first seen after the evidence base was built and still open.
+  const fresh = await q(`SELECT id FROM job_postings WHERE provenance='live' AND first_seen_at > $1 AND status <> 'expired' AND current_snapshot_id IS NOT NULL ORDER BY first_seen_at DESC LIMIT 500`, [base.finished_at]);
+  const newIds = new Set<string>(fresh.map((r) => r.id as string).filter((id) => !baseJobIds.has(id)));
   const wanted = [...baseJobIds, ...newIds];
 
   const jobRows = wanted.length
@@ -150,11 +147,12 @@ export async function loadEvidence(db: Db, roleId?: RoleId): Promise<LiveEvidenc
     counts: Object.fromEntries(counts.filter((c) => c.snapshot_id === s.id).map((c) => [c.skill_id, { jobs: c.jobs, required: c.required, preferred: c.preferred }])),
   }));
 
+  const lastRun = await q(`SELECT max(finished_at) t FROM worker_runs WHERE state='succeeded'`);
   const failed = await q(`SELECT 'report' kind, board_key target, error reason, at, retryable FROM scan_source_reports WHERE scan_id=$1 AND status='failed' UNION ALL SELECT 'result', candidate_key, reason, $2::timestamptz, false FROM scan_results WHERE scan_id=$1 AND status='inaccessible' LIMIT 50`, [base.id, base.finished_at]);
   const failedRetrievals: FailedRetrieval[] = failed.map((f, i) => ({ id: `f${i}`, sourceId: String(f.target).split(':')[0]!, target: String(f.target), reason: f.reason ?? 'unreadable', at: iso(f.at), retryable: !!f.retryable }));
 
   return {
     provenance: 'live', now: new Date().toISOString(), roleId: base.role_id, scenario: base.state === 'complete' ? 'complete' : 'partial',
-    jobs: [...sampleJobs, ...newJobs], sampleJobs, newJobs, companies, sources, scan, scanHistory, scanSummary, snapshots, failedRetrievals, botRanAt: iso(runs[0]!.finished_at),
+    jobs: [...sampleJobs, ...newJobs], sampleJobs, newJobs, companies, sources, scan, scanHistory, scanSummary, snapshots, failedRetrievals, botRanAt: iso(lastRun[0]?.t ?? runs[0]!.finished_at),
   };
 }
