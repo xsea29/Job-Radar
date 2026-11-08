@@ -41,6 +41,8 @@ Any host that runs a container or a Node process works (Fly.io, Render, Railway,
 | `BOARDS_FILE`, `TARGET_ROLE`, `TARGET_YEARS` | Which boards, and which role/experience window the evidence base is built for. |
 
 ## Deploy to Render as a web service
+> **No Blueprint (paid)?** Follow [docs/DEPLOY_RENDER.md](DEPLOY_RENDER.md): create the database and the Web Service by hand in the dashboard. The section below describes the Blueprint (`render.yaml`) route.
+
 `render.yaml` (repo root) is a Render **Blueprint** for **one web service + one Postgres database**. The web service runs everything itself: the API, the live-update stream and the scheduler (daily 06:00 IST + a refresh every 60 minutes). No cron jobs are needed.
 
 1. Make sure the repo is on GitHub (it is on `main`).
