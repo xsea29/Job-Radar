@@ -11,7 +11,8 @@
     "scan": "tsx src/cli/scan.ts",
     "discover": "tsx src/cli/discover.ts",
     "serve": "tsx src/cli/serve.ts",
-    "daily": "tsx src/cli/daily.ts"
+    "daily": "tsx src/cli/daily.ts",
+    "refresh": "tsx src/cli/refresh.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.3.0",

@@ -3,15 +3,15 @@
  * No external cron is needed; a single process does everything:
  *   - once a day at DAILY_AT (in TIMEZONE): full scan, snapshot (if due), reports, notification decisions
  *   - every REFRESH_EVERY_MINUTES: fetch the public boards, store new/changed postings, expire vanished ones
- *   - after each run: tells connected apps to refresh (server-sent events)
+ *   - after each run (by this process OR a cron job): tells connected apps to refresh (server-sent events)
+ * With SCHEDULER=off the process only serves the API and the live stream; use cron jobs for the runs.
  * A daily run missed while the server was down is caught up on start.
  */
-import { defaultContext, defaultRequest } from '@jobradar/ingest';
-import { loadBoards } from '../config';
 import { connect } from '../db/connect';
 import { migrate } from '../db/migrate';
 import { seedReference } from '../db/repo';
-import { EventHub } from '../events';
+import { EventHub, watchRuns } from '../events';
+import { runtimeDeps } from '../runtime';
 import { DEFAULT_SCHEDULE, Scheduler, type ScheduleConfig } from '../scheduler';
 import { createApp } from '../server';
 import { runPipeline } from '../worker';
@@ -36,39 +36,51 @@ await migrate(db);
 await seedReference(db);
 
 const boardsPath = env.BOARDS_FILE ?? 'config/boards.verified.json';
-const role = (env.TARGET_ROLE as 'fullstack' | 'backend' | 'frontend' | 'software' | undefined) ?? 'fullstack';
-const adjacent = { fullstack: ['fullstack', 'software'], backend: ['backend', 'software'], frontend: ['frontend', 'software'], software: ['software', 'fullstack', 'backend', 'frontend'] } as const;
-const years = Number(env.TARGET_YEARS ?? 4);
-const deps = () => ({
-  db,
-  boards: loadBoards(boardsPath), // re-read each run so edits to the file apply without a restart
-  ctx: defaultContext(),
-  request: defaultRequest({ targetRoleId: role, acceptedRoleIds: [...adjacent[role]], experience: { min: Math.max(0, years - 1), max: years + 2 } }),
-});
+const deps = () => runtimeDeps(db, env); // re-reads the boards file each run
 
 const hub = new EventHub();
+// Live push for runs made by this process AND by other processes (cron jobs): watch the run ledger.
+const stopWatching = watchRuns(db, hub, 15_000, (e) => log(`run watcher: ${e instanceof Error ? e.message : e}`));
+
+// SCHEDULER=off: this process only serves the API; runs come from cron jobs (see render.yaml).
+const schedulerOn = (env.SCHEDULER ?? 'on') !== 'off';
 const scheduler = new Scheduler(cfg, {
   runDaily: (keyDate) => runPipeline({ ...deps(), keyDate }, 'daily'),
   runRefresh: (slot) => runPipeline({ ...deps(), slot }, 'refresh'),
   dailyDone: async (keyDate) => (await db.query(`SELECT 1 FROM worker_runs WHERE run_key=$1 AND state='succeeded'`, [`daily:${keyDate}`])).rows.length > 0,
   needsBootstrap: async () => (await db.query(`SELECT 1 FROM scan_runs WHERE snapshot_created AND state IN ('complete','partial') LIMIT 1`)).rows.length === 0,
   log,
-  onFinished: (kind, r) => hub.publish('evidence-updated', { kind, newPostings: r.newPostings ?? 0, newlyExpired: r.newlyExpired ?? 0 }),
 });
 
 const app = createApp({
   db, jwtSecret: secret, corsOrigin: env.CORS_ORIGIN, hub,
-  runScan: () => runPipeline({ ...deps(), slot: Date.now() }, 'refresh').then((r) => hub.publish('evidence-updated', { kind: 'manual', newPostings: r.newPostings ?? 0 })),
+  runScan: () => runPipeline({ ...deps(), slot: Date.now() }, 'refresh'),
 });
 const port = Number(env.PORT ?? 8787);
+// With the scheduler off (cron jobs do the runs) a brand-new deployment would sit empty until the
+// first cron fires; do ONE daily run now if there is no evidence base at all.
+const bootstrapIfEmpty = async () => {
+  if (schedulerOn) return; // the scheduler's own bootstrap rule covers this
+  const empty = (await db.query(`SELECT 1 FROM scan_runs WHERE snapshot_created AND state IN ('complete','partial') LIMIT 1`)).rows.length === 0;
+  if (!empty) return;
+  log('No evidence yet: running one initial daily run…');
+  try {
+    log(`initial run: ${JSON.stringify(await runPipeline({ ...deps(), keyDate: new Date().toISOString().slice(0, 10) }, 'daily'))}`);
+  } catch (e) {
+    log(`initial run failed: ${e instanceof Error ? e.message : e}`);
+  }
+};
+
 const server = app.listen(port, () => {
-  log(`JobRadar API on :${port} · daily ${cfg.dailyAt} ${cfg.timeZone} · refresh ${cfg.refreshEveryMinutes ? `every ${cfg.refreshEveryMinutes} min` : 'off'} · boards: ${boardsPath}`);
-  scheduler.start();
+  log(`JobRadar API on :${port} · scheduler ${schedulerOn ? `on (daily ${cfg.dailyAt} ${cfg.timeZone}, refresh ${cfg.refreshEveryMinutes ? `every ${cfg.refreshEveryMinutes} min` : 'off'})` : 'off (runs come from cron jobs)'} · boards: ${boardsPath}`);
+  if (schedulerOn) scheduler.start();
+  else void bootstrapIfEmpty();
 });
 
 const stop = () => {
   log('Shutting down…');
   scheduler.stop();
+  stopWatching();
   hub.close();
   server.close(() => void db.close().then(() => process.exit(0)));
   setTimeout(() => process.exit(1), 10_000).unref();

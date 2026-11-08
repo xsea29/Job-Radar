@@ -34,7 +34,7 @@ It prints `n/100`, rejections by reason, duplicates, failures and every disclose
 ```bash
 npm install && npm run live      # API + built-in scheduler + app; first start fetches the real boards
 ```
-The server needs no external cron: it runs a daily job and frequent refreshes itself and pushes updates to the open app. Details, Docker, environment variables and hosting: [docs/DEPLOY.md](docs/DEPLOY.md).
+The server needs no external cron: it runs a daily job and frequent refreshes itself and pushes updates to the open app. Details, Docker, **Render (`render.yaml`: API + Postgres + cron jobs)**, environment variables and hosting: [docs/DEPLOY.md](docs/DEPLOY.md).
 
 ### Run the backend and point the app at it
 

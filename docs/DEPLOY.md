@@ -40,6 +40,33 @@ Any host that runs a container or a Node process works (Fly.io, Render, Railway,
 | `REFRESH_EVERY_MINUTES` | Refresh cadence; `0` disables. |
 | `BOARDS_FILE`, `TARGET_ROLE`, `TARGET_YEARS` | Which boards, and which role/experience window the evidence base is built for. |
 
+## Deploy to Render (cron jobs + API + Postgres)
+`render.yaml` in the repo root is a Render **Blueprint**. It creates:
+
+| Service | Type | What it does |
+|---|---|---|
+| `jobradar-api` | web (Docker, always-on) | REST API + the live-update stream. The in-process scheduler is **off**; it watches the run ledger and pushes a refresh signal when a cron job finishes. On a brand-new deployment it does one initial run so the app is not empty. |
+| `jobradar-daily` | cron job | `30 0 * * *` UTC = **06:00 IST**: full scan, demand snapshot (if due), reports, notification decisions. |
+| `jobradar-refresh` | cron job | `10,40 * * * *`: store new/changed postings, expire vanished ones. |
+| `jobradar-db` | Postgres | Region `singapore` (nearest to India). |
+
+**Steps**
+1. Push the repo to GitHub (it is on `main`).
+2. Render dashboard → **New → Blueprint** → select the repo → review → **Apply**. Fill `CORS_ORIGIN` (your web app's origin, plus `https://localhost,capacitor://localhost` for the native apps).
+3. Wait for the first deploy. The web service runs the initial run by itself (about a minute); check `https://<your-api>.onrender.com/v1/health`: it shows `lastRun`.
+4. Build the app against it: `VITE_API_URL=https://<your-api>.onrender.com npm run build -w @jobradar/mobile`.
+
+**Things to know**
+* The web service must be a paid always-on instance (`starter`): free web services sleep and would drop the live stream. The free Postgres plan expires after 30 days, so `render.yaml` uses a paid one; change it for a trial. Render cron jobs are billed per run time with a monthly minimum per job. Check current prices on Render's pricing page.
+* Plan names and field names in `render.yaml` follow Render's Blueprint spec as I know it; I could not run Render from here, so if the dashboard flags a field when you apply, adjust it there.
+* Render cron schedules are UTC only. To change the daily time, edit the `schedule` (IST = UTC + 5:30).
+* A cron job and the other cron job never overlap: runs are claimed in the database (one at a time, once per key). A duplicate or late trigger exits 0 with `{"skipped":"already-ran"}`; a crashed run's slot is retaken after 30 minutes; a failed run exits 1 so Render marks it failed.
+* Use Render's **internal** database URL (the blueprint does). For an external connection add `?sslmode=require`.
+* Edit `config/boards.verified.json` and redeploy to change which companies are tracked.
+* Prefer one always-on box over cron jobs? Set `SCHEDULER=on` on the web service (default), delete the two cron entries, and the in-process scheduler does the same work.
+
+**Verified here** (not on Render itself): the web service with `SCHEDULER=off` against a real PostgreSQL 16 server bootstrapped an empty database; `refresh` and `daily` run as separate processes against the same database; a client on the web service's event stream received the refresh signal from the other process; duplicate triggers were no-ops; the API served real data (matches, gaps) from that database. The Docker image itself was not built (no Docker daemon in the sandbox).
+
 ## Point the app at the server
 ```bash
 VITE_API_URL=https://api.example.com npm run build -w @jobradar/mobile   # static web app in apps/mobile/dist

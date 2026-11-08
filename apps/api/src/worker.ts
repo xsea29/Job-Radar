@@ -104,7 +104,7 @@ export async function runPipeline(d: DailyDeps, mode: PipelineMode): Promise<Dai
     // Track every relevant posting, not only the capped evidence base, so postings beyond the cap
     // are not mistaken for "new" by the next refresh.
     const tracked = mode === 'daily' ? buildScan(results, { ...base, scan: { target: 5000, quotas: { startup: 1700, mid: 1600, large: 1700 } } }) : outcome;
-    if (mode === 'daily') await d.db.transaction((tx) => persistPostings(tx, { boards: d.boards, outcome: tracked, at: now.toISOString() }));
+    const trackedSaved = mode === 'daily' ? await d.db.transaction((tx) => persistPostings(tx, { boards: d.boards, outcome: tracked, at: now.toISOString() })) : undefined;
     let out: DailyResult;
     if (mode === 'refresh') {
       const p = await d.db.transaction((tx) => persistPostings(tx, { boards: d.boards, outcome, at: now.toISOString() }));
@@ -117,7 +117,7 @@ export async function runPipeline(d: DailyDeps, mode: PipelineMode): Promise<Dai
       const saved = await saveScan(d.db, { outcome, request: d.request, boards: d.boards, startedAt: new Date(now.getTime() - 60_000), finishedAt: now, snapshotLabel: now.toLocaleString('en-GB', { month: 'short', year: 'numeric' }), createSnapshot });
       const newlyExpired = await expireMissing(d.db, results, now);
       const reports = await buildReports(d.db, now);
-      out = { mode, scanId: saved.scanId, snapshotCreated: createSnapshot, newlyExpired, newPostings: saved.newJobs, changedPostings: saved.changedJobs, validPostings: outcome.summary.valid, failedBoards: outcome.failedBoards, reports };
+      out = { mode, scanId: saved.scanId, snapshotCreated: createSnapshot, newlyExpired, newPostings: trackedSaved?.newJobs ?? saved.newJobs, changedPostings: trackedSaved?.changedJobs ?? saved.changedJobs, validPostings: outcome.summary.valid, failedBoards: outcome.failedBoards, reports };
     }
     await d.db.query(`UPDATE worker_runs SET state='succeeded', finished_at=now(), detail=$2 WHERE kind='daily' AND run_key=$1`, [key, JSON.stringify(out)]);
     return out;
