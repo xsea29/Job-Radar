@@ -1,0 +1,80 @@
+# ALTERNATIVE Render Blueprint: API + Postgres + two separate Render Cron Jobs (scheduler off in the web service).
+# The default is the single web service in render.yaml; use this file only if you want Render-managed cron jobs.
+# To use it: rename it to render.yaml (or point Render at it when creating the Blueprint).
+# Layout
+#   jobradar-api      always-on web service: REST API + live-update stream (the scheduler is OFF here)
+#   jobradar-daily    cron job, 06:00 IST every day  → full scan, snapshot (if due), reports
+#   jobradar-refresh  cron job, twice an hour        → store new/changed postings, expire vanished ones
+#   jobradar-db       Postgres
+# The web service notices runs made by the cron jobs (it watches the run ledger) and pushes a
+# refresh signal to connected apps. All times are UTC (Render cron has no time zone).
+
+databases:
+  - name: jobradar-db
+    databaseName: jobradar
+    user: jobradar
+    region: singapore          # nearest Render region to India
+    plan: basic-256mb          # the free plan expires after 30 days: use it for trials only
+
+services:
+  - type: web
+    name: jobradar-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    region: singapore
+    plan: starter              # must be always-on: free web services sleep and would drop the live stream
+    healthCheckPath: /v1/health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: jobradar-db, property: connectionString }
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN       # your web app origin, plus the native app origins
+        value: https://localhost,capacitor://localhost
+      - key: SCHEDULER         # cron jobs below do the runs
+        value: "off"
+      - key: BOARDS_FILE
+        value: config/boards.verified.json
+      - key: TARGET_ROLE
+        value: fullstack
+      - key: TARGET_YEARS
+        value: "4"
+
+  - type: cron
+    name: jobradar-daily
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: npx tsx src/cli/daily.ts
+    schedule: "30 0 * * *"     # 00:30 UTC = 06:00 IST
+    region: singapore
+    plan: starter
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: jobradar-db, property: connectionString }
+      - key: BOARDS_FILE
+        value: config/boards.verified.json
+      - key: TARGET_ROLE
+        value: fullstack
+      - key: TARGET_YEARS
+        value: "4"
+
+  - type: cron
+    name: jobradar-refresh
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerCommand: npx tsx src/cli/refresh.ts
+    schedule: "10,40 * * * *"  # :10 and :40, clear of the daily run at :30
+    region: singapore
+    plan: starter
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase: { name: jobradar-db, property: connectionString }
+      - key: BOARDS_FILE
+        value: config/boards.verified.json
+      - key: TARGET_ROLE
+        value: fullstack
+      - key: TARGET_YEARS
+        value: "4"
+      - key: REFRESH_SLOT_MINUTES
+        value: "30"

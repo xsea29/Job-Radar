@@ -10,7 +10,7 @@
   - [x] REST API: auth, profile, evidence, market, jobs, matches, gap+roadmap, reports, notification prefs, learning progress, scans
   - [x] App `apiSource` (set `VITE_API_URL`); live mode shows "Live data"
   - [x] Built-in scheduler (daily + refresh, tz-aware, catch-up, retries), DB-claimed runs, live push (SSE) to the app, `npm run live`, Dockerfile + compose (compose validated; image not built here: no Docker daemon)
-  - [x] Render blueprint (web + Postgres + daily/refresh cron jobs); verified on real PostgreSQL 16 with separate processes
+  - [x] Render blueprint: single web service with the built-in scheduler + Postgres (default `render.yaml`); cron-job variant in `render.cron.yaml`; verified on real PostgreSQL 16; heap cap keeps a run at ~320 MB
   - [ ] Open product decision: reach 100 via more boards or by treating Backend/Frontend roles as relevant to a Full-Stack target
 - [ ] **Stage 3** — verify with real permitted data; incomplete/failed-source and retry tests; native packaging; deployment, env vars, source terms and operating costs documented.
 

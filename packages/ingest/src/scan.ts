@@ -205,19 +205,24 @@ export function buildScan(results: FetchResult[], req: ScanRequest): ScanOutcome
   //    opening (another team), so it is kept.
   const verdicts: Verdict[] = [];
   const seenHash = new Map<string, string>();
-  const byKey = new Map<string, { id: string; sh: Set<string> }[]>();
+  // Text fingerprints are only needed to compare postings that share company+title+city, so compute them lazily
+  // (hundreds of MB if done for every posting in a large pool).
+  const byKey = new Map<string, { id: string; text: string; sh?: Set<string> }[]>();
   const pool: Candidate[] = [];
   const all = results.flatMap((r) => r.postings.map((p) => toCandidate(p, r.board))).sort((a, b) => recency(b) - recency(a) || a.id.localeCompare(b.id));
   for (const c of all) {
     let dupOf = seenHash.get(c.contentHash);
-    const sh = shingles(c.posting.description);
-    if (!dupOf) dupOf = byKey.get(c.canonicalKey)?.find((k) => jaccard(sh, k.sh) >= NEAR_DUPLICATE)?.id;
+    const group = byKey.get(c.canonicalKey);
+    if (!dupOf && group?.length) {
+      const sh = shingles(c.posting.description);
+      dupOf = group.find((k) => jaccard(sh, (k.sh ??= shingles(k.text))) >= NEAR_DUPLICATE)?.id;
+    }
     if (dupOf) {
       verdicts.push({ id: c.id, title: c.posting.title, company: c.posting.companyName, status: 'duplicate', duplicateOf: dupOf });
       continue;
     }
     seenHash.set(c.contentHash, c.id);
-    byKey.set(c.canonicalKey, [...(byKey.get(c.canonicalKey) ?? []), { id: c.id, sh }]);
+    byKey.set(c.canonicalKey, [...(byKey.get(c.canonicalKey) ?? []), { id: c.id, text: c.posting.description }]);
     pool.push(c);
   }
 
