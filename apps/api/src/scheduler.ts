@@ -41,6 +41,8 @@ export interface SchedulerHooks {
   onFinished?: (kind: 'daily' | 'refresh', result: DailyResult) => void;
 }
 
+const LOCKED_RETRY_MS = 2 * 60_000;
+
 export type TickOutcome = 'daily' | 'refresh' | 'retry-wait' | 'idle' | 'busy';
 
 /**
@@ -58,6 +60,7 @@ export class Scheduler {
   private lastRefreshAt = 0;
   private dailyFailures = 0;
   private retryNotBefore = 0;
+  private loggedLocked = false;
   private readonly dailyMin: number;
   constructor(private readonly cfg: ScheduleConfig, private readonly h: SchedulerHooks) {
     this.dailyMin = parseTime(cfg.dailyAt);
@@ -78,6 +81,14 @@ export class Scheduler {
       if ((bootstrap || minutes >= this.dailyMin) && now.getTime() >= this.retryNotBefore && this.dailyFailures <= this.cfg.maxRetries && !(await this.h.dailyDone(date))) {
         try {
           const r = await this.h.runDaily(date);
+          if (r.skipped === 'locked') {
+            // Another run holds the slot (e.g. one a restarted instance left behind). Wait, don't spin or spam.
+            this.retryNotBefore = now.getTime() + LOCKED_RETRY_MS;
+            if (!this.loggedLocked) this.h.log?.(`daily ${date}: another run holds the slot; retrying every ${LOCKED_RETRY_MS / 60_000} min until it finishes or goes stale`);
+            this.loggedLocked = true;
+            return 'retry-wait';
+          }
+          this.loggedLocked = false;
           this.dailyFailures = 0;
           this.h.log?.(`daily ${date}: ${JSON.stringify(r)}`);
           if (!r.skipped) this.h.onFinished?.('daily', r);

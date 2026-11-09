@@ -15,7 +15,7 @@ import { runtimeDeps } from '../runtime';
 import { DEFAULT_SCHEDULE, Scheduler, type ScheduleConfig } from '../scheduler';
 import { createApp } from '../server';
 import { makeTrigger } from '../trigger';
-import { runPipeline } from '../worker';
+import { releaseActiveRun, runPipeline } from '../worker';
 
 const env = process.env;
 const secret = env.JWT_SECRET;
@@ -88,7 +88,8 @@ const stop = () => {
   scheduler.stop();
   stopWatching();
   hub.close();
-  server.close(() => void db.close().then(() => process.exit(0)));
+  // Release an in-flight run's marker so the next instance can take over at once (a deploy or env change restarts us).
+  void releaseActiveRun().catch(() => undefined).finally(() => server.close(() => void db.close().then(() => process.exit(0))));
   setTimeout(() => process.exit(1), 10_000).unref();
 };
 process.on('SIGINT', stop);

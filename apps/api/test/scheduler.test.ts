@@ -2,7 +2,7 @@ import type { AddressInfo } from 'node:net';
 import type { Server } from 'node:http';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { defaultContext, defaultRequest } from '@jobradar/ingest';
-import { DEFAULT_SCHEDULE, EventHub, Scheduler, createApp, createPglite, loadEvidence, migrate, parseTime, runPipeline, seedReference, zonedParts, claimRun, type DailyResult, type Db } from '../src';
+import { DEFAULT_SCHEDULE, EventHub, Scheduler, createApp, createPglite, loadEvidence, migrate, parseTime, releaseActiveRun, runPipeline, seedReference, zonedParts, claimRun, type DailyResult, type Db } from '../src';
 import { NOW, boardOf, ok, pool, posting } from './helpers';
 
 describe('time helpers', () => {
@@ -198,5 +198,57 @@ describe('live updates (server-sent events)', () => {
     const off = createApp({ db, jwtSecret: 'x'.repeat(40) }).listen(0);
     expect((await fetch(`http://127.0.0.1:${(off.address() as AddressInfo).port}/v1/events`)).status).toBe(501);
     off.close();
+  });
+});
+
+describe('left-behind run markers (restart / deploy while a run was in flight)', () => {
+  let db: Db;
+  beforeEach(async () => { db = await createPglite(); await migrate(db); await seedReference(db); });
+  const n = async (sql: string) => Number((await db.query<{ n: string }>(sql)).rows[0]!.n);
+
+  it('releaseActiveRun frees the slot immediately, so the next instance is not locked out', async () => {
+    let release!: () => void;
+    const gate = new Promise<void>((r) => { release = r; });
+    const b = boardOf('slow', 'mid');
+    const running = runPipeline({ db, boards: [b], request: defaultRequest({ now: NOW }), ctx: defaultContext(), now: NOW, slot: 1, collect: async () => { await gate; return [ok(b, [posting(b, { title: 'Software Engineer' })])]; } }, 'refresh');
+    running.catch(() => undefined);
+    while ((await n(`SELECT count(*) n FROM worker_runs WHERE state='running'`)) === 0) await new Promise((r) => setTimeout(r, 20));
+    expect(await claimRun(db, 'daily', 'daily:next')).toBe('locked'); // the orphan-in-waiting blocks others
+    expect(await releaseActiveRun()).toBe(true); // what the SIGTERM handler does
+    expect(await claimRun(db, 'daily', 'daily:next')).toBe('ok'); // a new instance can start right away
+    const row = (await db.query<{ state: string; detail: { error: string } }>(`SELECT state, detail FROM worker_runs WHERE run_key='refresh:1'`)).rows[0]!;
+    expect(row.state).toBe('failed');
+    expect(row.detail.error).toMatch(/shutdown/);
+    release();
+    await running.catch(() => undefined);
+  });
+
+  it('a marker from a dead process is retaken once stale (15 min), not 30', async () => {
+    await db.query(`INSERT INTO worker_runs (kind, run_key, state, started_at) VALUES ('daily','daily:old','running', now() - interval '10 minutes')`);
+    expect(await claimRun(db, 'daily', 'daily:new')).toBe('locked');
+    await db.query(`UPDATE worker_runs SET started_at = now() - interval '16 minutes'`);
+    expect(await claimRun(db, 'daily', 'daily:new')).toBe('ok');
+  });
+
+  it('the scheduler backs off for 2 min when the daily slot is locked, and logs once instead of every tick', async () => {
+    let t = new Date('2026-11-09T05:00:00Z').getTime(); // 10:30 IST, daily due
+    const calls: number[] = [];
+    const logs: string[] = [];
+    let locked = true;
+    let done = false;
+    const s = new Scheduler({ ...DEFAULT_SCHEDULE, refreshEveryMinutes: 0 }, {
+      now: () => new Date(t), log: (m) => logs.push(m),
+      runDaily: async (): Promise<DailyResult> => { calls.push(t); if (locked) return { skipped: 'locked', mode: 'daily' }; done = true; return { mode: 'daily' }; },
+      runRefresh: async () => ({}), dailyDone: async () => done,
+    });
+    expect(await s.tick()).toBe('retry-wait');
+    t += 30_000; expect(await s.tick()).toBe('idle'); // inside the back-off: no call, no log spam
+    t += 30_000; expect(await s.tick()).toBe('idle');
+    expect(calls).toHaveLength(1);
+    t += 2 * 60_000; expect(await s.tick()).toBe('retry-wait'); // after 2 min it tries again
+    expect(calls).toHaveLength(2);
+    expect(logs.filter((l) => /holds the slot/.test(l))).toHaveLength(1); // logged once, not every time
+    locked = false;
+    t += 2 * 60_000; expect(await s.tick()).toBe('daily'); // slot freed → runs
   });
 });

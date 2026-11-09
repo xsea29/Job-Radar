@@ -39,7 +39,24 @@ export interface DailyResult {
 }
 
 const DAY = 86_400_000;
-const STALE_RUN_MINUTES = 30;
+// A run normally takes seconds to a few minutes (even on a small free instance). A 'running' marker older than this
+// is treated as left behind by a crashed/killed process and may be retaken.
+const STALE_RUN_MINUTES = 15;
+
+/** The run this process currently holds, so a shutdown can release it instead of orphaning the marker. */
+let activeRun: { db: Db; key: string } | null = null;
+
+/**
+ * Mark this process's in-flight run as failed so the next instance can take its slot immediately.
+ * Call from the SIGTERM/SIGINT handler (Render restarts the service on every deploy and env change).
+ */
+export async function releaseActiveRun(reason = 'interrupted by shutdown'): Promise<boolean> {
+  const r = activeRun;
+  if (!r) return false;
+  activeRun = null;
+  await r.db.query(`UPDATE worker_runs SET state='failed', finished_at=now(), detail=$2 WHERE kind='daily' AND run_key=$1 AND state='running'`, [r.key, JSON.stringify({ error: reason })]);
+  return true;
+}
 
 /**
  * Mark postings that vanished from a board read successfully as expired. A
@@ -98,6 +115,7 @@ export async function runPipeline(d: DailyDeps, mode: PipelineMode): Promise<Dai
   d.onClaim?.(claim);
   if (claim === 'locked') return { skipped: 'locked', mode };
   if (claim === 'already-ran') return { skipped: 'already-ran', mode };
+  activeRun = { db: d.db, key };
   try {
     const results = await (d.collect ?? collectBoards)(d.boards, d.ctx);
     const base = { ...d.request, now };
@@ -127,6 +145,8 @@ export async function runPipeline(d: DailyDeps, mode: PipelineMode): Promise<Dai
   } catch (e) {
     await d.db.query(`UPDATE worker_runs SET state='failed', finished_at=now(), detail=$2 WHERE kind='daily' AND run_key=$1`, [key, JSON.stringify({ error: String(e) })]);
     throw e;
+  } finally {
+    if (activeRun?.key === key) activeRun = null;
   }
 }
 
