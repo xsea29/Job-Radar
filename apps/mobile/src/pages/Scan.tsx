@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { REJECTION_LABELS, ROLE_LABELS, type QuotaRow, type RejectionReason } from '@jobradar/core';
 import { QuotaBars } from '../components/charts/QuotaBars';
 import { Page } from '../components/ui/Page';
+import { RefreshJobs } from '../components/domain/RefreshJobs';
 import { Badge, Button, Card, List, Overline, ProgressBar, Row } from '../components/ui/Primitives';
 import { ErrorState, PageSkeleton } from '../components/ui/States';
 import { evidenceSource } from '../data/source';
@@ -259,10 +260,11 @@ function LiveScanInfo() {
   return (
     <Page title="Scans" backHref="/tabs/home">
       <div className="jr-stack">
-        <h1 className="jr-h1">Scans run on the server</h1>
-        <p className="jr-muted">Real scans read public job boards and take a while, so they run on a schedule (daily) rather than on your phone. The latest result, its failures and every widening step are in Data transparency.</p>
+        <h1 className="jr-h1">Get the latest jobs</h1>
+        <p className="jr-muted">The scan runs on the server, not on your phone: it reads the public job boards of the tracked companies and adds any new postings. It also runs by itself every day.</p>
       </div>
-      <Button block onClick={() => nav('/transparency')}>
+      <RefreshJobs block />
+      <Button block variant="secondary" onClick={() => nav('/transparency')}>
         Open data transparency
       </Button>
     </Page>

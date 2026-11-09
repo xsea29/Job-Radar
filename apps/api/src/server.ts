@@ -19,6 +19,10 @@ export interface ServerOptions {
   trigger?: Trigger;
   /** Secret for /v1/cron/scan. Unset = that endpoint is disabled (501). At least 16 characters. */
   cronSecret?: string;
+  /** Lets the app run POST /v1/refresh without a login. Safe by design (one refresh per time slot, shared by everyone). Default off here; the server entry turns it on. */
+  publicRefresh?: boolean;
+  /** Hops of reverse proxy to trust for the client IP (Render = 1). Without it every user looks like the proxy and shares one rate limit. */
+  trustProxy?: number | string;
   /** Live-update channel for connected apps (GET /v1/events). */
   hub?: EventHub;
 }
@@ -52,6 +56,7 @@ const parse = <T extends z.ZodTypeAny>(schema: T, data: unknown): z.infer<T> => 
 export function createApp(o: ServerOptions) {
   const app = express();
   app.disable('x-powered-by');
+  if (o.trustProxy !== undefined && o.trustProxy !== '') app.set('trust proxy', Number.isNaN(Number(o.trustProxy)) ? o.trustProxy : Number(o.trustProxy));
   app.use(express.json({ limit: '256kb' }));
   app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -168,10 +173,25 @@ export function createApp(o: ServerOptions) {
     return result ? { http: 200, body: { status: 'done', mode, result } } : { http: 202, body: { status: 'started', mode, message: 'Still running after 90 s; check /v1/health for lastRun.' } };
   };
 
+  const lastRunAt = async () => {
+    const r = await o.db.query<{ t: Date | null }>(`SELECT max(finished_at) AS t FROM worker_runs WHERE state='succeeded'`);
+    return r.rows[0]?.t ? new Date(r.rows[0].t).toISOString() : null;
+  };
+
   app.post('/v1/scans/run', wrap(async (req, res) => {
     auth(req);
     const r = await startScan('refresh', false);
-    res.status(r.http).json(r.body);
+    res.status(r.http).json({ ...r.body, lastRunAt: await lastRunAt() });
+  }));
+
+  // "Update jobs" button in the app: no login, no secret. The only thing it can do is request a refresh,
+  // and a refresh is claimed once per time slot for EVERYONE (extra presses return `already-ran`),
+  // so it cannot be used to hammer the job boards. Waits for the result by default.
+  app.post('/v1/refresh', limit, wrap(async (req, res) => {
+    if (!o.publicRefresh) throw new HttpErr(501, 'Updating from the app is turned off on this server.', 'not_configured');
+    const wait = String(req.query.wait ?? 'true') !== 'false';
+    const r = await startScan('refresh', wait);
+    res.status(r.http).json({ ...r.body, lastRunAt: await lastRunAt() });
   }));
 
   // Secret-protected trigger for external schedulers (cron-job.org, UptimeRobot, curl…). GET and POST both work.

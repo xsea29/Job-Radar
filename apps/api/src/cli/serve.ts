@@ -61,6 +61,8 @@ const app = createApp({
   db, jwtSecret: secret, corsOrigin: env.CORS_ORIGIN, hub,
   trigger: makeTrigger(deps, Number(env.CRON_SLOT_MINUTES ?? 10)),
   cronSecret: env.CRON_SECRET,
+  publicRefresh: (env.PUBLIC_REFRESH ?? 'on') !== 'off',
+  trustProxy: env.TRUST_PROXY ?? (env.RENDER ? '1' : undefined), // Render sets RENDER=true and sits behind one proxy hop
 });
 const port = Number(env.PORT ?? 8787);
 // With the scheduler off (cron jobs do the runs) a brand-new deployment would sit empty until the

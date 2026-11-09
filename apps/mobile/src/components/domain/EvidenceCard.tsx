@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { IS_DEMO, type Evidence } from '../../data/source';
 import { dateRange, dateTime } from '../../lib/format';
 import { Badge, Button, Card, Overline, ProgressBar } from '../ui/Primitives';
+import { RefreshJobs } from './RefreshJobs';
 
 export function sourceHealthText(sources: Evidence['sources']): string {
   const connected = sources.filter((s) => s.status !== 'not_connected');
@@ -40,9 +41,10 @@ export function EvidenceCard({ evidence }: { evidence: Evidence }) {
       <div className="jr-grid-2">
         <Button onClick={() => nav('/tabs/jobs')}>View jobs</Button>
         <Button variant="secondary" icon={play} onClick={() => nav('/scan')}>
-          Run scan
+          {IS_DEMO ? 'Run scan' : 'Scan details'}
         </Button>
       </div>
+      <RefreshJobs variant="secondary" block />
     </Card>
   );
 }

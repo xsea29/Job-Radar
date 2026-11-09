@@ -911,3 +911,5 @@ ion-toolbar {
   padding: 7px 12px;
   border-radius: 10px;
 }
+
+.jr-refresh__err { color: var(--danger, #b3261e); }

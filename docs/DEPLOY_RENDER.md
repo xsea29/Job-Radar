@@ -138,3 +138,16 @@ The header shows **Live data** instead of **Demo data**.
 * **`ECONNREFUSED` / SSL errors to the database:** use the *Internal* URL for Render Postgres, or add `?sslmode=require` to an external URL.
 * **Restarts or out-of-memory:** upgrade the instance type.
 * **`/v1/market` says no scan yet:** wait a minute for the first run, or check the logs for a `daily … failed` line.
+
+## D. The "Update jobs now" button in the app
+
+The app has an **Update jobs now** button (Home → Evidence base card, and the Scan screen). It calls
+`POST /v1/refresh` on your server, which runs the scanner and then the app reloads the new data.
+
+- **No secret is stored in the app.** The endpoint needs no login. It is safe because a refresh can only run
+  once per `CRON_SLOT_MINUTES` (default 10) for *everyone*: extra presses just answer "already updated", so the
+  button cannot be used to hammer the job boards. It is also rate-limited per IP.
+- Build the app pointing at your server: `VITE_API_URL=https://<your-service>.onrender.com`.
+- If the server was asleep, the first press takes about a minute (the server wakes up, then scans).
+- To switch the button off, set `PUBLIC_REFRESH=off` on the service. Your `CRON_SECRET` endpoint is unaffected.
+- On Render the server sits behind one proxy, so `TRUST_PROXY=1` is set automatically (otherwise all users would share one rate limit).

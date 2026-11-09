@@ -124,3 +124,57 @@ describe('GET|POST /v1/cron/scan', () => {
     expect(JSON.stringify(r.body)).not.toContain('db down');
   });
 });
+
+describe('POST /v1/refresh (the app button)', () => {
+  const bootPublic = (over: { publicRefresh?: boolean; authRateLimit?: number; trustProxy?: number } = {}) => {
+    server.close();
+    const trigger = makeTrigger(() => ({ db, boards: results.map((r) => r.board), ctx: defaultContext(), request: defaultRequest({ now: NOW }), collect: async () => { fetchCalls++; return results; } }), 10);
+    server = createApp({ db, jwtSecret: 'x'.repeat(40), trigger, publicRefresh: over.publicRefresh ?? true, authRateLimit: over.authRateLimit ?? 100, trustProxy: over.trustProxy }).listen(0);
+    base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  };
+  const post = (path = '/v1/refresh', headers: Record<string, string> = {}) => get(path, { method: 'POST', headers });
+
+  it('is off (501) unless explicitly enabled', async () => {
+    bootPublic({ publicRefresh: false });
+    expect((await post()).status).toBe(501);
+    expect(fetchCalls).toBe(0);
+  });
+
+  it('needs no login or secret, runs the scanner, waits for the result and reports when data was last updated', async () => {
+    bootPublic();
+    const r = await post();
+    expect(r.status).toBe(200);
+    expect(r.body).toMatchObject({ status: 'done', mode: 'refresh', result: { newPostings: 1, validPostings: 1 } });
+    expect(typeof r.body.lastRunAt).toBe('string');
+    expect(Number((await db.query<{ n: string }>(`SELECT count(*) n FROM job_postings`)).rows[0]!.n)).toBe(1);
+  });
+
+  it('many presses = one scan: repeats are `already-ran` and fetch nothing (cannot be used to hammer the boards)', async () => {
+    bootPublic();
+    expect((await post()).body.status).toBe('done');
+    for (let i = 0; i < 5; i++) expect((await post()).body).toMatchObject({ status: 'already-ran' });
+    expect(fetchCalls).toBe(1);
+  });
+
+  it('can return immediately with ?wait=false', async () => {
+    bootPublic();
+    const r = await post('/v1/refresh?wait=false');
+    expect(r).toMatchObject({ status: 202, body: { status: 'started' } });
+    await until(async () => (await runs()).some((x) => x.state === 'succeeded'));
+  });
+
+  it('only POST is accepted (a link preview or crawler GET cannot trigger it)', async () => {
+    bootPublic();
+    expect((await get('/v1/refresh')).status).toBe(404);
+    expect(fetchCalls).toBe(0);
+  });
+
+  it('rate-limits per client IP, and behind a proxy different users have different limits', async () => {
+    bootPublic({ authRateLimit: 2, trustProxy: 1 });
+    const a = () => post('/v1/refresh?wait=false', { 'X-Forwarded-For': '203.0.113.7' }).then((r) => r.status);
+    const codes = [await a(), await a(), await a()];
+    expect(codes[2]).toBe(429);
+    const other = await post('/v1/refresh?wait=false', { 'X-Forwarded-For': '198.51.100.9' }); // a different user is not blocked
+    expect(other.status).not.toBe(429);
+  });
+});
