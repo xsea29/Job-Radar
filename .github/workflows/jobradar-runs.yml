@@ -1,0 +1,75 @@
+# Runs JobRadar's scheduled data jobs on GitHub's servers, straight against the database,
+# so data stays fresh even when the Render web service is asleep (free plan) or down.
+#
+#   daily   06:00 IST (00:30 UTC): full scan, snapshot (if due), reports, notification decisions
+#   refresh every hour at :10    : store new/changed postings, expire vanished ones
+#
+# Setup: repo → Settings → Secrets and variables → Actions → New repository secret
+#        DATABASE_URL = the EXTERNAL connection string of your Postgres (ends with ?sslmode=require)
+# Runs can start a few minutes late (GitHub's scheduler is best-effort); the jobs are idempotent,
+# claim their slot in the database, and a missed run is caught up by the next one.
+name: JobRadar data runs
+
+on:
+  schedule:
+    - cron: '30 0 * * *'
+    - cron: '10 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Which job to run now
+        type: choice
+        options: [daily, refresh]
+        default: daily
+
+concurrency:
+  group: jobradar-run
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install (API workspace only)
+        run: npm ci --workspace=@jobradar/api --include-workspace-root --omit=dev
+
+      - name: Decide which job to run
+        id: mode
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "mode=${{ inputs.mode }}" >> "$GITHUB_OUTPUT"
+          elif [ "${{ github.event.schedule }}" = "30 0 * * *" ]; then
+            echo "mode=daily" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=refresh" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check the database secret is set
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::Add the DATABASE_URL repository secret (Settings → Secrets and variables → Actions)."
+            exit 1
+          fi
+
+      - name: Run ${{ steps.mode.outputs.mode }}
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          BOARDS_FILE: config/boards.verified.json
+          TARGET_ROLE: fullstack
+          TARGET_YEARS: '4'
+          REFRESH_SLOT_MINUTES: '60'
+          NODE_OPTIONS: --max-old-space-size=3072
+        run: npm run ${{ steps.mode.outputs.mode }} -w @jobradar/api
