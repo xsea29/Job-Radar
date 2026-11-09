@@ -2,7 +2,9 @@ import express, { type NextFunction, type Request, type Response } from 'express
 import { z } from 'zod';
 import { classifySkillTrend, computeDemand, computeGapAnalysis, computeMatch, concentration, getSkill, buildRoadmap, toMatchProfile, type RoleId, type UserProfile } from '@jobradar/core';
 import type { Db } from './db/types';
+import { createHash, timingSafeEqual } from 'node:crypto';
 import type { EventHub } from './events';
+import type { Trigger, TriggerMode } from './trigger';
 import { loadEvidence } from './evidence';
 import { hashPassword, loadProfile, saveProfile, signToken, verifyPassword, verifyToken } from './users';
 
@@ -13,8 +15,10 @@ export interface ServerOptions {
   corsOrigin?: string;
   /** Requests per minute per IP on auth routes. */
   authRateLimit?: number;
-  /** Optional trigger for an on-demand scan (wired to runDaily by the server entry). */
-  runScan?: () => Promise<unknown>;
+  /** Starts the scanner on demand (see GET|POST /v1/cron/scan and POST /v1/scans/run). */
+  trigger?: Trigger;
+  /** Secret for /v1/cron/scan. Unset = that endpoint is disabled (501). At least 16 characters. */
+  cronSecret?: string;
   /** Live-update channel for connected apps (GET /v1/events). */
   hub?: EventHub;
 }
@@ -148,11 +152,41 @@ export function createApp(o: ServerOptions) {
     const r = await o.db.query(`SELECT id, role_id, region, target, valid, state, started_at, finished_at, retrieved, duplicates, inaccessible, rejected, broadening, snapshot_created FROM scan_runs ORDER BY finished_at DESC LIMIT $1 OFFSET $2`, [lim, offset]);
     res.json({ items: r.rows });
   }));
+  // Start the scanner now. Shared by the signed-in route and the secret-protected cron route.
+  let inflight = false;
+  const startScan = async (mode: TriggerMode, wait: boolean) => {
+    if (!o.trigger) throw new HttpErr(501, 'Scanning is not configured on this server.', 'not_configured');
+    if (inflight) return { http: 200, body: { status: 'busy', mode, message: 'A scan is already running in this process.' } };
+    const h = o.trigger(mode);
+    inflight = true;
+    void h.done.then(() => undefined, () => undefined).finally(() => { inflight = false; });
+    const claim = await h.claimed;
+    if (claim === 'locked') return { http: 200, body: { status: 'busy', mode, message: 'Another run is in progress.' } };
+    if (claim === 'already-ran') return { http: 200, body: { status: 'already-ran', mode, message: 'This slot already ran; nothing to do.' } };
+    if (!wait) return { http: 202, body: { status: 'started', mode } };
+    const result = await Promise.race([h.done, new Promise<null>((r) => setTimeout(() => r(null), 90_000))]);
+    return result ? { http: 200, body: { status: 'done', mode, result } } : { http: 202, body: { status: 'started', mode, message: 'Still running after 90 s; check /v1/health for lastRun.' } };
+  };
+
   app.post('/v1/scans/run', wrap(async (req, res) => {
     auth(req);
-    if (!o.runScan) throw new HttpErr(501, 'Scanning is not configured on this server.', 'not_configured');
-    void o.runScan().catch(() => undefined); // runs in the background; poll /v1/scans
-    res.status(202).json({ accepted: true });
+    const r = await startScan('refresh', false);
+    res.status(r.http).json(r.body);
+  }));
+
+  // Secret-protected trigger for external schedulers (cron-job.org, UptimeRobot, curl…). GET and POST both work.
+  const sha = (x: string) => createHash('sha256').update(x).digest();
+  app.all('/v1/cron/scan', limit, wrap(async (req, res) => {
+    if (req.method !== 'GET' && req.method !== 'POST') throw new HttpErr(405, 'Use GET or POST.', 'method_not_allowed');
+    if (!o.cronSecret || o.cronSecret.length < 16) throw new HttpErr(501, 'The cron trigger is disabled: set CRON_SECRET (16+ characters).', 'not_configured');
+    const header = String(req.headers.authorization ?? '').replace(/^Bearer /, '') || String(req.headers['x-cron-secret'] ?? '');
+    const given = header || String(req.query.key ?? ''); // ?key= works for services that cannot set headers; it ends up in URLs/logs, so prefer the header
+    if (!given || !timingSafeEqual(sha(given), sha(o.cronSecret))) throw new HttpErr(401, 'Invalid or missing secret.', 'unauthorized');
+    const mode = String(req.query.mode ?? 'refresh');
+    if (mode !== 'refresh' && mode !== 'daily') throw new HttpErr(400, 'mode must be "refresh" or "daily".', 'validation');
+    const wait = ['1', 'true', 'yes'].includes(String(req.query.wait ?? ''));
+    const r = await startScan(mode, wait);
+    res.status(r.http).json(r.body);
   }));
 
   // ── personal ──

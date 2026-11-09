@@ -14,6 +14,7 @@ import { EventHub, watchRuns } from '../events';
 import { runtimeDeps } from '../runtime';
 import { DEFAULT_SCHEDULE, Scheduler, type ScheduleConfig } from '../scheduler';
 import { createApp } from '../server';
+import { makeTrigger } from '../trigger';
 import { runPipeline } from '../worker';
 
 const env = process.env;
@@ -30,6 +31,10 @@ const cfg: ScheduleConfig = {
   refreshEveryMinutes: env.REFRESH_EVERY_MINUTES != null ? Number(env.REFRESH_EVERY_MINUTES) : DEFAULT_SCHEDULE.refreshEveryMinutes,
 };
 
+if (env.CRON_SECRET && env.CRON_SECRET.length < 16) {
+  console.error('CRON_SECRET must be at least 16 characters (or leave it unset to disable /v1/cron/scan).');
+  process.exit(2);
+}
 const log = (m: string) => console.log(`[${new Date().toISOString()}] ${m}`);
 const db = await connect();
 await migrate(db);
@@ -54,7 +59,8 @@ const scheduler = new Scheduler(cfg, {
 
 const app = createApp({
   db, jwtSecret: secret, corsOrigin: env.CORS_ORIGIN, hub,
-  runScan: () => runPipeline({ ...deps(), slot: Date.now() }, 'refresh'),
+  trigger: makeTrigger(deps, Number(env.CRON_SLOT_MINUTES ?? 10)),
+  cronSecret: env.CRON_SECRET,
 });
 const port = Number(env.PORT ?? 8787);
 // With the scheduler off (cron jobs do the runs) a brand-new deployment would sit empty until the

@@ -19,6 +19,8 @@ export interface DailyDeps {
   keyDate?: string;
   /** Idempotency slot for a refresh run (the scheduler passes floor(now / interval)). */
   slot?: number;
+  /** Called as soon as the run slot has been claimed (or refused), before the slow work starts. */
+  onClaim?: (claim: 'ok' | 'locked' | 'already-ran') => void;
 }
 
 export type PipelineMode = 'daily' | 'refresh';
@@ -93,6 +95,7 @@ export async function runPipeline(d: DailyDeps, mode: PipelineMode): Promise<Dai
   const now = d.now ?? new Date();
   const key = mode === 'daily' ? `daily:${d.keyDate ?? now.toISOString().slice(0, 10)}` : `refresh:${d.slot ?? Math.floor(now.getTime() / 3_600_000)}`;
   const claim = await claimRun(d.db, 'daily', key);
+  d.onClaim?.(claim);
   if (claim === 'locked') return { skipped: 'locked', mode };
   if (claim === 'already-ran') return { skipped: 'already-ran', mode };
   try {

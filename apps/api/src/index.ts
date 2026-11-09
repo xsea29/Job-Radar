@@ -11,3 +11,4 @@ export * from './users';
 export * from './scheduler';
 export * from './events';
 export * from './runtime';
+export * from './trigger';

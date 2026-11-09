@@ -15,7 +15,7 @@ beforeEach(async () => {
   db = await createPglite();
   await migrate(db);
   await seedReference(db);
-  server = createApp({ db, jwtSecret: SECRET, authRateLimit: 100, runScan: async () => undefined }).listen(0);
+  server = createApp({ db, jwtSecret: SECRET, authRateLimit: 100, trigger: () => ({ claimed: Promise.resolve('ok'), done: Promise.resolve({}) }) }).listen(0);
   base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
 });
 afterEach(() => server.close());

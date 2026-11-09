@@ -45,7 +45,7 @@ npm run serve -w @jobradar/api                           # REST API on :8787 (DA
 VITE_API_URL=http://localhost:8787 npm run dev           # app now shows real data ("Live data" pill) instead of the demo
 ```
 
-API (all JSON, `/v1`): `auth/register|login`, `DELETE me`, `evidence`, `market`, `jobs` (+`/:id`), `scans` (+`POST scans/run`), `profile`, `matches`, `gap` (with roadmap), `reports`, `notifications/preferences`, `learning/progress`, `health`. Validation (zod), pagination, scrypt-hashed passwords, HS256 bearer tokens, auth rate limiting, no request bodies in logs.
+API (all JSON, `/v1`): `auth/register|login`, `DELETE me`, `evidence`, `market`, `jobs` (+`/:id`), `scans` (+`POST scans/run`), **`GET|POST cron/scan`** (secret-protected: starts the scanner on demand), `profile`, `matches`, `gap` (with roadmap), `reports`, `notifications/preferences`, `learning/progress`, `health`. Validation (zod), pagination, scrypt-hashed passwords, HS256 bearer tokens, auth rate limiting, no request bodies in logs.
 
 Android/iOS packaging uses Capacitor (`apps/mobile/capacitor.config.ts`):
 

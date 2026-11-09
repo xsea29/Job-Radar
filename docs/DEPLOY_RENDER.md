@@ -26,6 +26,43 @@ Good to know:
 ## B. Optional: keep the web service awake (no cold start)
 Create a free monitor at https://uptimerobot.com: type **HTTP(s)**, URL `https://<your-service>.onrender.com/v1/health`, interval **5 minutes**. Requests every 5 minutes stop Render from putting the service to sleep, so the app opens instantly and the live stream stays connected. Check Render's current free-plan terms (monthly instance hours). Without this the app still works, it just waits for the service to wake on the first visit.
 
+## C. Trigger endpoint: run the scanner by calling a URL
+The server has an endpoint that starts the scanner for new jobs whenever something calls it: a free cron service (cron-job.org), UptimeRobot, a GitHub Action, or plain `curl`. It also **wakes a sleeping Render service**, so one pinger can both keep it alive and fetch new jobs.
+
+**Enable it:** add the environment variable `CRON_SECRET` on the Render service (16+ characters, e.g. `openssl rand -hex 24`). Without it the endpoint is disabled (HTTP 501).
+
+**Call it** (replace the address and secret):
+```bash
+# find new jobs (refresh): returns right away
+curl -H "Authorization: Bearer $CRON_SECRET" https://<your-service>.onrender.com/v1/cron/scan
+
+# same, but wait for the result (up to 90 s)
+curl -H "Authorization: Bearer $CRON_SECRET" "https://<your-service>.onrender.com/v1/cron/scan?wait=true"
+
+# full daily run (scan + snapshot + reports); once per UTC day
+curl -H "Authorization: Bearer $CRON_SECRET" "https://<your-service>.onrender.com/v1/cron/scan?mode=daily"
+
+# for services that cannot set headers (the secret then appears in URLs and logs; prefer the header)
+https://<your-service>.onrender.com/v1/cron/scan?key=<CRON_SECRET>
+```
+GET and POST both work. The secret can also be sent as an `X-Cron-Secret` header.
+
+| Response | Meaning |
+|---|---|
+| `202 {"status":"started"}` | The scan was started and is running in the background. |
+| `200 {"status":"done","result":{...}}` | With `wait=true`: finished; `result` has `newPostings`, `newlyExpired`, `validPostings`, `failedBoards`. |
+| `200 {"status":"already-ran"}` | This time slot already ran (a repeat call is a safe no-op). |
+| `200 {"status":"busy"}` | Another run is in progress right now. |
+| `401` / `501` / `400` / `429` | Wrong or missing secret / endpoint disabled / bad `mode` / too many bad attempts. |
+
+**It cannot be used to hammer the job boards:** a refresh is allowed once per `CRON_SLOT_MINUTES` (default 10) and a daily run once per UTC day; extra calls return `already-ran` without fetching anything. Check progress any time at `/v1/health` (`lastRun`).
+
+**Wire it to a free scheduler, e.g. cron-job.org:** create a job, URL `https://<your-service>.onrender.com/v1/cron/scan`, schedule every 30 minutes, under Advanced add the header `Authorization: Bearer <CRON_SECRET>`. A call that arrives while Render is asleep wakes the service (about 30–60 s); if the cron service gives up before it answers, the next call a few minutes later gets through. For a 06:00 IST daily run add a second job with `?mode=daily` at 00:30 UTC.
+
+Note that a call on a free Render instance runs the scan on its limited CPU and memory (a run peaked around 320 MB here); GitHub Actions (§A) does the heavy lifting off Render and is the more robust choice. §A and §C can be used together: they share the same once-per-slot claims, so they never double-run.
+
+---
+
 ---
 
 You create two things by hand: a **database** and a **Web Service**. The Web Service runs everything: API, live updates and the scheduler (daily 06:00 IST + refresh every 60 min).
@@ -60,6 +97,7 @@ New + → **Web Service** → connect GitHub → pick `xsea29/Job-Radar`.
 | `CORS_ORIGIN` | `https://localhost,capacitor://localhost` plus your app's address, e.g. `,http://localhost:5173` for local testing |
 | `NODE_VERSION` | `22` |
 | `NODE_OPTIONS` | `--max-old-space-size=320` |
+| `CRON_SECRET` | optional: a secret that enables the trigger endpoint (§C) |
 | `SCHEDULER` | `off` (the data runs happen in GitHub Actions; with `off` the service still does ONE initial run if the database is empty) |
 | `DAILY_AT` | `06:00` |
 | `TIMEZONE` | `Asia/Kolkata` |
